@@ -70,5 +70,12 @@ We use AI not just for buzz — but for real insights:
 
 ---
 
+## Running with Docker
+
+Build and start all services:
+   ```sh
+   docker-compose up --build
+   ```
+
 > Helping students make informed decisions — simply, clearly, and effectively.  
 **Smartify: Your personalized guide to the future.**
