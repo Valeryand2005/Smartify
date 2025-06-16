@@ -4,7 +4,7 @@ import os
 
 # Загрузка данных из JSON
 data_dir = 'database'
-file_path = os.path.abspath(os.path.join(data_dir, 'synthetic_dataset.json'))
+file_path = os.path.abspath(os.path.join(data_dir, 'dataset_career_test.json'))
 
 if not os.path.exists(file_path):
     print(f"Ошибка: Файл {file_path} не найден!")
@@ -85,4 +85,4 @@ with open(os.path.join(data_dir, 'validation_report.txt'), 'w', encoding='utf-8'
         f.write("Найдены следующие проблемы:\n")
         for issue in validation_issues:
             f.write(f"- {issue}\n")
-print(f"Отчёт о валидации сохранён в {os.path.join(data_dir, 'validation_report.txt')}")
+print(f"Отчёт о валидации сохранён в {os.path.join(data_dir, 'validation_report_dataset_career_test.txt')}")
