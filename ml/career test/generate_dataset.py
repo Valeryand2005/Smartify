@@ -97,7 +97,7 @@ if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 
 # Определение абсолютного пути для файла
-file_path = os.path.abspath(os.path.join(data_dir, 'synthetic_dataset.json'))
+file_path = os.path.abspath(os.path.join(data_dir, 'dataset_career_test.json'))
 
 try:
     # Сохранение датасета
