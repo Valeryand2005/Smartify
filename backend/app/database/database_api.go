@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -12,6 +13,11 @@ type User struct {
 	Email    string
 	Password string
 }
+
+var (
+	ErrUserNotFound  = errors.New("database: user not found")
+	ErrDuplicateUser = errors.New("database: user with such email already exists")
+)
 
 func CreateUsersTable(database *sql.DB) error {
 	_, err := database.Exec(
@@ -32,21 +38,41 @@ func CreateUsersTable(database *sql.DB) error {
 	return err
 }
 
-func CheckText(s string) error {
+func CheckUser(email string, database *sql.DB) error {
+	var id int
+	err := database.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&id)
+	if err == sql.ErrNoRows {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Failed to check email: %w", err)
+	}
+	return ErrDuplicateUser
+}
+
+func PrepareUser(email string, database *sql.DB) error {
+	err := CreateUsersTable(database)
+	if err != nil {
+		return fmt.Errorf("Failed to create table: %w", err)
+	}
+	err2 := CheckUser(email, database)
+	if err2 != nil {
+		return err2
+	}
 	return nil
+}
+
+func HashFunc(s string) string {
+	return s
 }
 
 func Add_new_user(user User, database *sql.DB) error {
 	log.Printf("Add user to db: %s, %s", user.Email, user.Password)
 
-	CreateUsersTable(database)
-	/*database.Exec(
-		"CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email VARCHAR(255) UNIQUE NOT NULL, password VARCHAR(255) NOT NULL );",
-	)*/
 	_, err := database.Exec(
 		"INSERT INTO users (email, password_hash) VALUES ($1, $2)",
 		user.Email,
-		user.Password,
+		HashFunc(user.Password),
 	)
 	if err != nil {
 		return fmt.Errorf("Failed to insert user: %w", err)
