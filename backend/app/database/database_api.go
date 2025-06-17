@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 
 	_ "github.com/lib/pq"
 )
@@ -38,6 +39,12 @@ func CreateUsersTable(database *sql.DB) error {
 	return err
 }
 
+func IsValidEmail(email string) bool {
+	regex := `^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$`
+	re := regexp.MustCompile(regex)
+	return re.MatchString(email)
+}
+
 func CheckUser(email string, database *sql.DB) error {
 	var id int
 	err := database.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&id)
@@ -54,6 +61,9 @@ func PrepareUser(email string, database *sql.DB) error {
 	err := CreateUsersTable(database)
 	if err != nil {
 		return fmt.Errorf("Failed to create table: %w", err)
+	}
+	if !IsValidEmail(email) {
+		return fmt.Errorf("invalid email format")
 	}
 	err2 := CheckUser(email, database)
 	if err2 != nil {
