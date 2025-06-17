@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/authorization/authorization_page.dart';
+import 'package:smartify/pages/sign/sign_up_page.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -80,10 +81,10 @@ class WelcomePage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
+                          Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const AuthorizationPage(),
+                            builder: (context) => const SignUpPage(),
                           ),
                         );
                       },
@@ -108,7 +109,12 @@ class WelcomePage extends StatelessWidget {
                       const Text('Already have an account?'),
                       TextButton(
                         onPressed: () {
-                          // TODO: переход на логин
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AuthorizationPage(),
+                            ),
+                          );
                         },
                         child: const Text(
                           'Log in',
