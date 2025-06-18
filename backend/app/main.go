@@ -13,6 +13,9 @@ import (
 func main() {
 	// register API-route
 	http.HandleFunc("/api/login", api.LoginHandler)
+	http.HandleFunc("/api/registration_emailvalidation", api.RegistrationHandler_EmailValidation)
+	http.HandleFunc("/api/registration_codevalidation", api.RegistrationHandler_CodeValidation)
+	http.HandleFunc("/api/registration_password", api.RegistrationHandler_Password)
 
 	// Init database
 	db, err := sql.Open("postgres", fmt.Sprintf(
