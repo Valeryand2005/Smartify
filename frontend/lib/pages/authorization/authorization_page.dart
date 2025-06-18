@@ -20,7 +20,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
       _passwordController.text
     );
 
-    if (response.statusCode == 200) {
+    if (response) {
       // Successful entry
       Navigator.pushReplacement(
         context,
@@ -29,7 +29,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
     } else {
       // Failed to log in
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response.body}')),
+        SnackBar(content: Text('Some Error')),
       );
     }
   }

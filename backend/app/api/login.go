@@ -10,6 +10,7 @@ import (
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("New connection!")
+	w.Header().Set("Content-Type", "application/json")
 
 	var user database.User
 	// Try to decode message
@@ -28,7 +29,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err = database.FindUser(user.Email, user.Password_hash, &user, db)
 	if err != nil {
 		log.Printf("Cannot write in database: %s", err)
-		http.Error(w, "Account will not be found...", http.StatusBadRequest)
+		http.Error(w, "Cannot create user... error with database", http.StatusBadRequest)
 		return
 	}
 
