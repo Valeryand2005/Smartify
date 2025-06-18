@@ -7,6 +7,8 @@ import (
 	"log"
 	"regexp"
 
+	"golang.org/x/crypto/bcrypt"
+
 	_ "github.com/lib/pq"
 )
 
@@ -97,10 +99,11 @@ func FindUser(email string, password string, user *User, database *sql.DB) error
 
 func FindAndCheckUser(email string, password string, user *User, database *sql.DB) error {
 	err := database.QueryRow(`
-        SELECT id
+        SELECT id, password_hash
         FROM users 
-        WHERE email = $1 and password_hash = $2`, email, HashFunc(password)).Scan(
+        WHERE email = $1`, email).Scan(
 		&user.ID,
+		&user.Password_hash,
 	)
 
 	if err == sql.ErrNoRows {
@@ -109,6 +112,13 @@ func FindAndCheckUser(email string, password string, user *User, database *sql.D
 	if err != nil {
 		return fmt.Errorf("Failed to query user: %w", err)
 	}
+
+	compare := CheckPasswordHash(password, user.Password_hash)
+
+	if !compare {
+		return fmt.Errorf("Wrong password: %s", password)
+	}
+
 	return nil
 }
 
@@ -183,17 +193,26 @@ func PrepareUser(email string, database *sql.DB) error {
 	return nil
 }
 
-func HashFunc(s string) string {
-	return s
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 func Add_new_user(user User, database *sql.DB) error {
 	log.Printf("Add user to db: %s, %s", user.Email, user.Password_hash)
-
+	h, err1 := HashPassword(user.Password_hash)
+	if err1 != nil {
+		return fmt.Errorf("Failed to hash password: %s", user.Password_hash)
+	}
 	_, err := database.Exec(
 		"INSERT INTO users (email, password_hash) VALUES ($1, $2)",
 		user.Email,
-		HashFunc(user.Password_hash),
+		h,
 	)
 	if err != nil {
 		return fmt.Errorf("Failed to insert user: %w", err)
