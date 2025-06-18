@@ -92,8 +92,8 @@ func sendEmail(to, subject, body string) error {
 	// Настройки SMTP-сервера
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"
-	smtpUsername := "НАПИШИТЕ ЗДЕСЬ ПОЧТУ"
-	smtpPassword := "НАПИШИТЕ ЗДЕСЬ ПАРОЛЬ"
+	smtpUsername := "projectsmartifyapp@gmail.com"
+	smtpPassword := "iegn yhso uqye ikrm"
 
 	// Формируем письмо
 	msg := []byte(
