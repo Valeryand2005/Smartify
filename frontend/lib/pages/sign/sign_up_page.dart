@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:smartify/pages/authorization/authorization_page.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
+import 'package:smartify/pages/api_server/api_server.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -35,7 +36,6 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -116,7 +116,18 @@ class _SignUpPageState extends State<SignUpPage> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => setState(() => currentStep = 1),
+            onPressed: () async {
+              final success = await ApiService.registration_emailValidation(
+                emailController.text
+              );
+              if (success) {
+                setState(() => currentStep = 1);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Ошибка с почтой!")),
+                );
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF54D0C0),
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -127,8 +138,6 @@ class _SignUpPageState extends State<SignUpPage> {
             child: const Text("Create an account", style: TextStyle(color: Colors.white)),
           ),
         ),
-        const SizedBox(height: 20),
-        _termsText(),
       ],
     );
   }
@@ -202,8 +211,18 @@ class _SignUpPageState extends State<SignUpPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: () {
-              setState(() => currentStep = 2);
+            onPressed: () async {
+              final success = await ApiService.registration_codeValidation(
+                emailController.text,
+                codeController.text,
+              );
+              if (success) {
+                setState(() => currentStep = 2);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Неверный код или ошибка подключения")),
+                );
+              }
             },
             child: const Text("Verify email", style: TextStyle(color: Colors.white)),
           ),
@@ -298,7 +317,18 @@ Widget _buildPasswordStep() {
       SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: passwordStrength == 1.0 ? () => setState(() => currentStep = 3) : null,
+          onPressed: passwordStrength == 1.0
+          ? () async {
+              final success = await ApiService.registration_password(emailController.text, passwordController.text);
+              if (success) {
+                setState(() => currentStep = 3); 
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Ошибка регистрации")),
+                );
+              }
+            }
+          : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: passwordStrength == 1.0 ? const Color(0xFF54D0C0) : const Color(0xFFB2DFDB),
             foregroundColor: Colors.white,
@@ -366,25 +396,18 @@ Widget _buildPasswordStep() {
     );
   }
 
-Widget _termsText() {
-  return const Center(
-    child: Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Text.rich(
-        TextSpan(
-          text: "By using Smartify, you agree to the ",
-          children: [
-            TextSpan(
+  Widget _termsText() {
+    return const Text.rich(
+      TextSpan(
+        text: "By using Smartify, you agree to the ",
+        children: [
+          TextSpan(
               text: "Terms and Privacy Policy.",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 12),
+              style: TextStyle(fontWeight: FontWeight.bold)),
+        ],
       ),
-    ),
-  );
-}
-
+      textAlign: TextAlign.center,
+      style: TextStyle(fontSize: 12),
+    );
+  }
 }

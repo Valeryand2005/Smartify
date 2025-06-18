@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smartify/pages/reset/reset_password_page.dart';
+import 'package:smartify/pages/api_server/api_server.dart';
+import 'package:smartify/pages/menu/menu_page.dart';
+
 
 class AuthorizationPage extends StatefulWidget {
   const AuthorizationPage({super.key});
@@ -10,6 +12,28 @@ class AuthorizationPage extends StatefulWidget {
 
 class _AuthorizationPageState extends State<AuthorizationPage> {
   bool _obscurePassword = true;
+  final _emailController = TextEditingController();     // To retrieve the entered email
+  final _passwordController = TextEditingController();  // To retrieve the entered password
+
+  Future<void> _login() async {
+    final response = await ApiService.login(
+      _emailController.text, 
+      _passwordController.text
+    );
+
+    if (response) {
+      // Successful entry
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MenuPage()), 
+      );
+    } else {
+      // Failed to log in
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Some Error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +64,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             ),
             const SizedBox(height: 6),
             TextField(
+              controller:  _emailController,
               decoration: InputDecoration(
                 hintText: 'example@example',
                 border: OutlineInputBorder(
@@ -55,6 +80,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             ),
             const SizedBox(height: 6),
             TextField(
+              controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
                 hintText: 'Enter password',
@@ -79,9 +105,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: логика входа
-                },
+                onPressed: _login, // TODO: логика входа
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF54D0C0),
                   foregroundColor: Colors.white,
