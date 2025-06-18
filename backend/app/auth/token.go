@@ -1,54 +1,64 @@
 package auth
 
 import (
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type TokenService struct {
-	secretKey []byte
-}
-
-func NewTokenService(secret string) *TokenService {
-	return &TokenService{secretKey: []byte(secret)}
-}
+var (
+	jwtKey          = []byte(os.Getenv("JWT_SECRET"))
+	accessTokenTTL  = time.Minute * 15
+	refreshTokenTTL = time.Hour * 24 * 7
+)
 
 type Claims struct {
-	UserID int64  `json:"user_id"`
-	Role   string `json:"role"`
+	UserID int `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-func (s *TokenService) GenerateTokens(userID int64, userRole string) (accessToken string, refreshToken string, err error) {
+func GenerateTokens(userID int) (accessToken string, refreshToken string, err error) {
+	now := time.Now()
+
 	accessClaims := &Claims{
 		UserID: userID,
-		Role:   userRole,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Subject:   "access_token",
+			ExpiresAt: jwt.NewNumericDate(now.Add(accessTokenTTL)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
-	}
-	accessTokenJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	accessToken, err = accessTokenJWT.SignedString(s.secretKey)
-	if err != nil {
-		return "", "", err
 	}
 
 	refreshClaims := &Claims{
 		UserID: userID,
-		Role:   userRole,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Subject:   "refresh_token",
+			ExpiresAt: jwt.NewNumericDate(now.Add(refreshTokenTTL)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
 	}
-	refreshTokenJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	refreshToken, err = refreshTokenJWT.SignedString(s.secretKey)
+
+	accessToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString(jwtKey)
 	if err != nil {
-		return "", "", err
+		return
 	}
-	return accessToken, refreshToken, nil
+
+	refreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString(jwtKey)
+	return
+}
+
+func ParseToken(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*Claims)
+	if !ok || !token.Valid {
+		return nil, err
+	}
+
+	return claims, nil
 }
