@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:smartify/pages/authorization/authorization_page.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
+import 'package:smartify/pages/api_server/api_server.dart';
+import 'dart:convert';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -115,7 +117,30 @@ class _SignUpPageState extends State<SignUpPage> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => setState(() => currentStep = 1),
+            onPressed: () async {
+              // Проверка на пустой email
+              if (emailController.text.isEmpty || !emailController.text.contains('@')) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Введите корректный email')),
+                );
+                return;
+              }
+
+              // Отправка email на сервер
+              final response = await ApiService.registration_emailValidation(emailController.text);
+
+              // Если ответ успешный (200) - переходим к шагу 2
+              if (response.statusCode == 200) {
+                setState(() => currentStep = 1);
+              } 
+              // Если ошибка - показываем сообщение
+              else {
+                final error = jsonDecode(response.body)['message'] ?? 'Ошибка сервера';
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(error)),
+                );
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF54D0C0),
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -199,8 +224,20 @@ class _SignUpPageState extends State<SignUpPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: () {
-              setState(() => currentStep = 2);
+            onPressed: () async {
+              final response = await ApiService.registration_codeValidation(
+                  emailController.text, 
+                  codeController.text
+              );
+
+              if (response.statusCode == 200) {
+                  setState(() => currentStep = 2);
+              } else {
+                  final error = jsonDecode(response.body)['message'] ?? 'Invalid code';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(error)),
+                  );
+              }
             },
             child: const Text("Verify email", style: TextStyle(color: Colors.white)),
           ),
@@ -295,7 +332,21 @@ Widget _buildPasswordStep() {
       SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: passwordStrength == 1.0 ? () => setState(() => currentStep = 3) : null,
+          onPressed: passwordStrength == 1.0 ? () async {
+              final response = await ApiService.registration_password(
+                  emailController.text,
+                  passwordController.text
+              );
+
+              if (response.statusCode == 200) {
+                  setState(() => currentStep = 3);
+              } else {
+                  final error = jsonDecode(response.body)['message'] ?? 'Registration failed';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(error)),
+                  );
+              }
+          } : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: passwordStrength == 1.0 ? const Color(0xFF54D0C0) : const Color(0xFFB2DFDB),
             foregroundColor: Colors.white,

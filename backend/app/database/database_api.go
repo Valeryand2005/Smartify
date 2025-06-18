@@ -11,8 +11,17 @@ import (
 )
 
 type User struct {
-	Email    string
-	Password string
+	id            int
+	Email         string `json:"email"`
+	Password_hash string `json:"password"`
+	First_name    sql.NullString
+	Last_name     sql.NullString
+	Middle_name   sql.NullString
+	Date_of_birth sql.NullString
+	Created_at    string
+	Last_login    sql.NullString
+	Is_active     bool
+	User_role     string
 }
 
 var (
@@ -57,6 +66,35 @@ func CheckUser(email string, database *sql.DB) error {
 	return ErrDuplicateUser
 }
 
+// Функция для получшения данных о пользователе
+func FindUser(email string, password string, user *User, database *sql.DB) error {
+	err := database.QueryRow(`
+        SELECT id, email, password_hash, first_name, last_name, middle_name, 
+               date_of_birth, created_at, last_login, is_active, user_role
+        FROM users 
+        WHERE email = $1 and password_hash = $2`, email, password).Scan(
+		&user.id,
+		&user.Email,
+		&user.Password_hash,
+		&user.First_name,
+		&user.Last_name,
+		&user.Middle_name,
+		&user.Date_of_birth,
+		&user.Created_at,
+		&user.Last_login,
+		&user.Is_active,
+		&user.User_role,
+	)
+
+	if err == sql.ErrNoRows {
+		return ErrUserNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("Failed to query user: %w", err)
+	}
+	return nil
+}
+
 func PrepareUser(email string, database *sql.DB) error {
 	err := CreateUsersTable(database)
 	if err != nil {
@@ -77,12 +115,12 @@ func HashFunc(s string) string {
 }
 
 func Add_new_user(user User, database *sql.DB) error {
-	log.Printf("Add user to db: %s, %s", user.Email, user.Password)
+	log.Printf("Add user to db: %s, %s", user.Email, user.Password_hash)
 
 	_, err := database.Exec(
 		"INSERT INTO users (email, password_hash) VALUES ($1, $2)",
 		user.Email,
-		HashFunc(user.Password),
+		HashFunc(user.Password_hash),
 	)
 	if err != nil {
 		return fmt.Errorf("Failed to insert user: %w", err)

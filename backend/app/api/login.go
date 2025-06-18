@@ -1,19 +1,12 @@
 package api
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
 )
-
-var db *sql.DB
-
-func InitDatabase(db_ *sql.DB) {
-	db = db_
-}
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("New connection!")
@@ -27,15 +20,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
+
 	// Print Message
-	log.Printf("User: %s, %s", user.Email, user.Password)
+	log.Printf("User: %s, %s", user.Email, user.Password_hash)
 
-	// Add user in database
-	err = database.Add_new_user(user, db)
-
+	// Find user in database
+	err = database.FindUser(user.Email, user.Password_hash, &user, db)
 	if err != nil {
 		log.Printf("Cannot write in database: %s", err)
-		http.Error(w, "Error with database... Try again!", http.StatusBadRequest)
+		http.Error(w, "Account will not be found...", http.StatusBadRequest)
 		return
 	}
 
