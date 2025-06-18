@@ -4,37 +4,40 @@ class UniversityCard extends StatelessWidget {
   final String image;
   final String title;
   final double rating;
+  final VoidCallback onTap;
 
   const UniversityCard({
     Key? key,
     required this.image,
     required this.title,
     required this.rating,
+    required this.onTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1, // квадратная форма: ширина = высота
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
-        child: Stack(
-          alignment: Alignment.bottomLeft,
+        child: Column(
           children: [
-            Image.network(
-              image,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              errorBuilder: (context, error, stackTrace) {
-                debugPrint('Ошибка загрузки изображения: $error');
-                return Container(
-                  color: Colors.grey,
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.broken_image, size: 50, color: Colors.white),
-                );
-              },
+            Expanded(
+              child: Image.network(
+                image,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Ошибка загрузки изображения: $error');
+                  return Container(
+                    color: Colors.grey,
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.broken_image, size: 50, color: Colors.white),
+                  );
+                },
+              ),
             ),
             Container(
               width: double.infinity,
@@ -49,12 +52,15 @@ class UniversityCard extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 16,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   Row(
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 16),
+                      const SizedBox(width: 4),
                       Text(
                         rating.toString(),
                         style: const TextStyle(color: Colors.white),

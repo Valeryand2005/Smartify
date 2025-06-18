@@ -47,7 +47,7 @@ class UniversityGrid extends StatelessWidget {
               return UniversityCard(
                 image: university['image'],
                 title: university['title'],
-                rating: university['rating'],
+                rating: university['rating'], onTap: () {  },
               );
             }).toList(),
           ),

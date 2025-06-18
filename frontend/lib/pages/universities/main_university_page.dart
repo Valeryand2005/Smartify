@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:smartify/pages/universities/uniDetPAge.dart';
 import 'package:smartify/pages/universities/universityCard.dart';
+import 'package:smartify/pages/universities/uniCard.dart';
 
 class UniversityPage extends StatefulWidget {
   const UniversityPage({super.key});
@@ -12,6 +14,7 @@ class UniversityPage extends StatefulWidget {
 
 class _UniversityPageState extends State<UniversityPage> {
   List universities = [];
+  List filteredUniversities = [];
 
   @override
   void initState() {
@@ -24,6 +27,18 @@ class _UniversityPageState extends State<UniversityPage> {
     final List data = json.decode(jsonString);
     setState(() {
       universities = data;
+      filteredUniversities = data;
+    });
+  }
+
+  void filterSearch(String query) {
+    final filtered = universities.where((uni) {
+      final name = uni['название'].toString().toLowerCase();
+      return name.contains(query.toLowerCase());
+    }).toList();
+
+    setState(() {
+      filteredUniversities = filtered;
     });
   }
 
@@ -51,12 +66,14 @@ class _UniversityPageState extends State<UniversityPage> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                // Search and Filter
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: Row(
                     children: [
                       Expanded(
                         child: TextField(
+                          onChanged: filterSearch,
                           decoration: InputDecoration(
                             hintText: 'Search...',
                             prefixIcon: const Icon(Icons.search),
@@ -78,22 +95,23 @@ class _UniversityPageState extends State<UniversityPage> {
                         child: IconButton(
                           icon: const Icon(Icons.tune, color: Colors.white, size: 20),
                           onPressed: () {
-                            // Пока без логики фильтра
+                            // TODO: add filter logic
                           },
                         ),
                       ),
                     ],
                   ),
                 ),
+                // GridView
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final itemWidth = MediaQuery.of(context).size.width / 2;
+                      final itemWidth = (constraints.maxWidth - 48) / 2;
                       final itemHeight = itemWidth;
 
                       return GridView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: universities.length,
+                        itemCount: filteredUniversities.length,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           childAspectRatio: itemWidth / itemHeight,
@@ -101,11 +119,19 @@ class _UniversityPageState extends State<UniversityPage> {
                           mainAxisSpacing: 16,
                         ),
                         itemBuilder: (context, index) {
-                          final uni = universities[index];
+                          final uni = filteredUniversities[index];
                           return UniversityCard(
                             image: uni['фото'],
                             title: uni['название'],
                             rating: double.tryParse(uni['рейтинг'].toString()) ?? 4.0,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => UniversityDetailPage(university: uni),
+                                ),
+                              );
+                            },
                           );
                         },
                       );
