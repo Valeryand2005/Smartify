@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
         CHECK (user_role IN ('student', 'tutor', 'administrator'))
 );
 
-CREATE TABLE refresh_tokens (
+CREATE TABLE IF NOT EXISTS refresh_tokens (
     id SERIAL PRIMARY KEY,
     user_id int REFERENCES users(id),
     token TEXT NOT NULL,
