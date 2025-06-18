@@ -35,6 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -126,6 +127,8 @@ class _SignUpPageState extends State<SignUpPage> {
             child: const Text("Create an account", style: TextStyle(color: Colors.white)),
           ),
         ),
+        const SizedBox(height: 20),
+        _termsText(),
       ],
     );
   }
@@ -363,18 +366,25 @@ Widget _buildPasswordStep() {
     );
   }
 
-  Widget _termsText() {
-    return const Text.rich(
-      TextSpan(
-        text: "By using Smartify, you agree to the ",
-        children: [
-          TextSpan(
+Widget _termsText() {
+  return const Center(
+    child: Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Text.rich(
+        TextSpan(
+          text: "By using Smartify, you agree to the ",
+          children: [
+            TextSpan(
               text: "Terms and Privacy Policy.",
-              style: TextStyle(fontWeight: FontWeight.bold)),
-        ],
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 12),
       ),
-      textAlign: TextAlign.center,
-      style: TextStyle(fontSize: 12),
-    );
-  }
+    ),
+  );
+}
+
 }
