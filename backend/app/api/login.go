@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/auth"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
 )
 
@@ -25,17 +26,33 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("User: %s, %s", user.Email, user.Password_hash)
 
 	// Find user in database
-	err = database.FindUser(user.Email, user.Password_hash, &user, db)
+	err = database.FindAndCheckUser(user.Email, user.Password_hash, &user, db)
 	if err != nil {
 		log.Printf("Cannot write in database: %s", err)
 		http.Error(w, "Account will not be found...", http.StatusBadRequest)
 		return
 	}
 
-	// Generate Token for user
-	token := map[string]string{"token": "fake_jwt_token_123"}
+	accessToken, refreshToken, err := auth.GenerateTokens(user.ID)
+	if err != nil {
+		log.Printf("Cannot generate tokens: %s", err)
+		http.Error(w, "Error generating tokens", http.StatusInternalServerError)
+		return
+	}
+
+	err = database.StoreRefreshToken(user.ID, refreshToken, db)
+	if err != nil {
+		log.Printf("Cannot store refresh token: %s", err)
+		http.Error(w, "Error saving refresh token", http.StatusInternalServerError)
+		return
+	}
+
+	resp := map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	}
 
 	// Send successful answer
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(token)
+	json.NewEncoder(w).Encode(resp)
 }
