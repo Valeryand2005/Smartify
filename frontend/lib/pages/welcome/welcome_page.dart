@@ -31,7 +31,7 @@ class WelcomePage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const SizedBox(), 
+              const SizedBox(),
               Column(
                 children: [
                   const Text(
@@ -41,28 +41,12 @@ class WelcomePage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'S',
-                          style: TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'martify',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
+                  const SizedBox(height: 0), // tighter spacing
+                  Image.asset(
+                    'logo.png',
+                    height: 180,
+                    width: 300,
+                    fit: BoxFit.contain,
                   ),
                 ],
               ),
@@ -89,11 +73,11 @@ class WelcomePage extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.tealAccent.shade400,
+                        backgroundColor: const Color(0xFF54D0C0),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       child: const Text(

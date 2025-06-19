@@ -196,6 +196,7 @@ func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Cannot create user... error with database", http.StatusBadRequest)
 		return
 	}
+	delete(temporary_users, user_request.Email)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "Password was created",

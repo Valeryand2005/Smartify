@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smartify/pages/api_server/api_server.dart';
 import 'package:smartify/pages/menu/menu_page.dart';
 
+
 class AuthorizationPage extends StatefulWidget {
   const AuthorizationPage({super.key});
 
@@ -106,11 +107,11 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
               child: ElevatedButton(
                 onPressed: _login, // TODO: логика входа
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.tealAccent.shade100,
-                  foregroundColor: Colors.black87,
+                  backgroundColor: const Color(0xFF54D0C0),
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
@@ -123,7 +124,12 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             Center(
               child: TextButton(
                 onPressed: () {
-                  // TODO: восстановление пароля
+                  Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ResetPasswordPage(),
+                        ),
+                  );
                 },
                 child: const Text(
                   'Forgot password?',

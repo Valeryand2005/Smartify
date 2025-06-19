@@ -12,3 +12,11 @@ CREATE TABLE IF NOT EXISTS users (
     user_role VARCHAR(20) NOT NULL DEFAULT 'student' 
         CHECK (user_role IN ('student', 'tutor', 'administrator'))
 );
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id int REFERENCES users(id),
+    token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);

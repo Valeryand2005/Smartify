@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:smartify/pages/menu/menu_page.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
 
 void main() {
