@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/api_server/api_server.dart';
 import 'package:smartify/pages/menu/menu_page.dart';
+import 'package:smartify/pages/reset/reset_password_page.dart';
 
 
 class AuthorizationPage extends StatefulWidget {
