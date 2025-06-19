@@ -11,6 +11,7 @@ import (
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("New connection!")
+	w.Header().Set("Content-Type", "application/json")
 
 	var user database.User
 	// Try to decode message
@@ -18,7 +19,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println("Cannot decode request")
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid JSON",
+		})
 		return
 	}
 
@@ -29,21 +33,30 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err = database.FindAndCheckUser(user.Email, user.Password_hash, &user, db)
 	if err != nil {
 		log.Printf("Cannot write in database: %s", err)
-		http.Error(w, "Account will not be found...", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Account will not be found...",
+		})
 		return
 	}
 
 	accessToken, refreshToken, err := auth.GenerateTokens(user.ID)
 	if err != nil {
 		log.Printf("Cannot generate tokens: %s", err)
-		http.Error(w, "Error generating tokens", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Error generating tokens",
+		})
 		return
 	}
 
 	err = database.StoreRefreshToken(user.ID, refreshToken, db)
 	if err != nil {
 		log.Printf("Cannot store refresh token: %s", err)
-		http.Error(w, "Error saving refresh token", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Error saving refresh token",
+		})
 		return
 	}
 
@@ -53,6 +66,5 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send successful answer
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
