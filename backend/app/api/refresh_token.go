@@ -58,8 +58,9 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = database.StoreRefreshToken(userID, newRefreshToken, db)
+	database.StoreRefreshToken(userID, newRefreshToken, db)
 
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(TokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
