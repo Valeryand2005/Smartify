@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:smartify/pages/authorization/authorization_page.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
@@ -35,11 +34,23 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              _emailSent
-                  ? 'We have sent an email to ${_emailController.text} with instructions to reset your password.'
-                  : 'We will email you a link to reset your password',
-              style: const TextStyle(fontSize: 14),
+            if (_emailSent)
+              Center(
+                child: Image.asset(
+                  'email.png',
+                  height: 140,
+                  width: 200,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            Center(
+              child: Text(
+                _emailSent
+                    ? 'We have sent an email to ${_emailController.text} with instructions to reset your password.'
+                    : 'We will email you a link to reset your password',
+                style: const TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
             ),
             const SizedBox(height: 24),
             if (!_emailSent) ...[
@@ -69,7 +80,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   } else {
                     if (_emailController.text.trim().isNotEmpty) {
                       setState(() => _emailSent = true);
-                      // TODO: actually send reset email
+                      // TODO: actually send reset password
                     }
                   }
                 },
