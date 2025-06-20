@@ -16,6 +16,7 @@ func main() {
 	http.HandleFunc("/api/registration_emailvalidation", api.RegistrationHandler_EmailValidation)
 	http.HandleFunc("/api/registration_codevalidation", api.RegistrationHandler_CodeValidation)
 	http.HandleFunc("/api/registration_password", api.RegistrationHandler_Password)
+	http.HandleFunc("/api/refresh", api.RefreshHandler)
 
 	// Init database
 	db, err := sql.Open("postgres", fmt.Sprintf(

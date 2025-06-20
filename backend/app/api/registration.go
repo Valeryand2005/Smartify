@@ -24,6 +24,7 @@ func InitDatabase(db_ *sql.DB) {
 // Для первого этапа регистрации (Ввод почты и подтверждение)
 func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Registration:")
+	w.Header().Set("Content-Type", "application/json")
 
 	var email struct {
 		Email string `json:"email"`
@@ -43,20 +44,20 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	// Check if the mail is valid
 	if !database.IsValidEmail(email.Email) {
 		log.Printf("Not valid Email")
-		http.Error(w, "Not valid Email...", http.StatusBadRequest)
+		http.Error(w, "Not valid Email", http.StatusBadRequest)
 		return
 	}
 
 	// Check if the mail was used
 	if _, exists := temporary_users[email.Email]; exists {
 		log.Printf("User already exists")
-		http.Error(w, "User already exists...", http.StatusBadRequest)
+		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
 
 	if err := database.CheckUser(email.Email, db); err != nil {
 		log.Printf("User already exists")
-		http.Error(w, "User already exists...", http.StatusBadRequest)
+		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
 
@@ -64,7 +65,7 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	number, err := Generate5DigitCode()
 	if err != nil {
 		log.Printf("Cannot generate code: %s", err)
-		http.Error(w, "Cannot generate code...", http.StatusBadRequest)
+		http.Error(w, "Cannot generate code", http.StatusInternalServerError)
 		return
 	}
 
@@ -75,21 +76,24 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	err = sendEmail(email.Email, "Email Validation", number)
 	if err != nil {
 		log.Printf("Cannot send message: %s", err)
-		http.Error(w, "Cannot send message...", http.StatusBadRequest)
+		http.Error(w, "Cannot send verification email", http.StatusInternalServerError)
 		return
 	}
 
 	// Send successful answer
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode("Success")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Verification code sent",
+		"code":    http.StatusOK,
+	})
 }
 
 func sendEmail(to, subject, body string) error {
 	// Настройки SMTP-сервера
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"
-	smtpUsername := "Напишите здесь свой аккаунт"
-	smtpPassword := "Напишиите здесь свой app password"
+	smtpUsername := "projectsmartifyapp@gmail.com"
+	smtpPassword := "iegn yhso uqye ikrm"
 
 	// Формируем письмо
 	msg := []byte(
@@ -115,6 +119,8 @@ func sendEmail(to, subject, body string) error {
 // Для второго этапа регистрации (Подтверждение кода)
 func RegistrationHandler_CodeValidation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Registration-CodeValidation:")
+	w.Header().Set("Content-Type", "application/json")
+
 	type request struct {
 		Email string `json:"email"`
 		Code  string `json:"code"`
@@ -145,12 +151,18 @@ func RegistrationHandler_CodeValidation(w http.ResponseWriter, r *http.Request) 
 
 	// Отправляем успешный ответ
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode("Success")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Code Verified",
+		"code":    http.StatusOK,
+	})
 }
 
-// Для второго этапа регистрации (Подтверждение кода)
+// Для третьего этапа (Создание пароля)
 func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 	log.Println("Registration-Password:")
+	w.Header().Set("Content-Type", "application/json")
+
 	type request struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -184,7 +196,12 @@ func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Cannot create user... error with database", http.StatusBadRequest)
 		return
 	}
-
+	delete(temporary_users, user_request.Email)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Password was created",
+		"code":    http.StatusOK,
+	})
 }
 
 // Функция для генерации 5-значного числа (с ведущими нулями в том числе)
