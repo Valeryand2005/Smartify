@@ -34,6 +34,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
         SnackBar(content: Text('Some Error')),
       );
     }
+    
   }
 
   @override
