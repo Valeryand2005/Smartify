@@ -47,7 +47,7 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = database.DeleteRefreshToken(req.RefreshToken, db)
+	database.DeleteRefreshToken(req.RefreshToken, db)
 
 	accessToken, newRefreshToken, err := auth.GenerateTokens(userID)
 	if err != nil {
@@ -65,4 +65,6 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
 	})
+
+	return
 }

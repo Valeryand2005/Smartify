@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/authorization/authorization_page.dart';
+import 'package:smartify/pages/api_server/api_server.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
@@ -63,13 +64,21 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_emailSent) {
                     Navigator.pop(context); // Go back to login
                   } else {
                     if (_emailController.text.trim().isNotEmpty) {
-                      setState(() => _emailSent = true);
-                      // TODO: actually send reset email
+                      final success = await ApiService.forgot_password(
+                        _emailController.text
+                      );
+                      if (success) {
+                        setState(() => _emailSent = true);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Неверный код или ошибка подключения")),
+                        );
+                      }
                     }
                   }
                 },

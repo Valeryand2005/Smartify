@@ -98,4 +98,26 @@ class ApiService {
       return false;
     }
   }
+
+  // Запрос на восстановление пароля
+  static Future<bool> forgot_password(String email) async {
+    try {
+      final response = await http.post(
+      Uri.parse('$_baseUrl/forgot_password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email}),
+    );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return true;
+      } else {
+        final data = jsonDecode(response.body);
+        return false;
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return false;
+    }
+  }
 }

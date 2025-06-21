@@ -150,6 +150,37 @@ func FindUserByEmail(email string, user *User, database *sql.DB) error {
 	return nil
 }
 
+// UpdateUsersPassword обновляет пароль пользователя по email
+func UpdateUsersPassword(email string, newPassword string, database *sql.DB) error {
+	// Хешируем новый пароль
+	hashedPassword, err := HashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// Обновляем пароль в базе данных
+	result, err := database.Exec(
+		"UPDATE users SET password_hash = $1 WHERE email = $2",
+		hashedPassword,
+		email,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update password: %w", err)
+	}
+
+	// Проверяем, что была обновлена хотя бы одна строка
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to check rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
+}
+
 func FindUserByID(ID int, user *User, database *sql.DB) error {
 	err := database.QueryRow(`
         SELECT id, email, password_hash, first_name, last_name, middle_name, 
