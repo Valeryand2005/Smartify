@@ -34,7 +34,10 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&email)
 	if err != nil {
 		log.Println("Cannot decode request")
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid request",
+		})
 		return
 	}
 
@@ -44,20 +47,29 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	// Check if the mail is valid
 	if !database.IsValidEmail(email.Email) {
 		log.Printf("Not valid Email")
-		http.Error(w, "Not valid Email", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Not valid Email",
+		})
 		return
 	}
 
 	// Check if the mail was used
 	if _, exists := temporary_users[email.Email]; exists {
 		log.Printf("User already exists")
-		http.Error(w, "User already exists", http.StatusConflict)
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "User already exists",
+		})
 		return
 	}
 
 	if err := database.CheckUser(email.Email, db); err != nil {
 		log.Printf("User already exists")
-		http.Error(w, "User already exists", http.StatusConflict)
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "User already exists",
+		})
 		return
 	}
 
@@ -65,7 +77,10 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	number, err := Generate5DigitCode()
 	if err != nil {
 		log.Printf("Cannot generate code: %s", err)
-		http.Error(w, "Cannot generate code", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Cannot generate code",
+		})
 		return
 	}
 
@@ -76,7 +91,10 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	err = sendEmail(email.Email, "Email Validation", number)
 	if err != nil {
 		log.Printf("Cannot send message: %s", err)
-		http.Error(w, "Cannot send verification email", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Cannot send verification email",
+		})
 		return
 	}
 
@@ -131,21 +149,30 @@ func RegistrationHandler_CodeValidation(w http.ResponseWriter, r *http.Request) 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Println("Cannot decode request")
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid JSON",
+		})
 		return
 	}
 
 	// Проверяем сущетсвоание пользователя
 	if _, exists := temporary_users[user.Email]; !exists {
 		log.Printf("User does not exists")
-		http.Error(w, "User does not exists...", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "User does not exists...",
+		})
 		return
 	}
 
 	// Проверяем код
 	if user.Code != temporary_users[user.Email] {
 		log.Printf("Code does not equal")
-		http.Error(w, "Code does not equal...", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Code does not equal...",
+		})
 		return
 	}
 
@@ -173,14 +200,20 @@ func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user_request)
 	if err != nil {
 		log.Println("Cannot decode request")
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid JSON",
+		})
 		return
 	}
 
 	// Проверяем сущетсвоание пользователя
 	if _, exists := temporary_users[user_request.Email]; !exists {
 		log.Printf("User does not exists")
-		http.Error(w, "User does not exists...", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "User does not exists...",
+		})
 		return
 	}
 
@@ -193,7 +226,10 @@ func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 	err = database.Add_new_user(user, db)
 	if err != nil {
 		log.Printf("Error with database")
-		http.Error(w, "Cannot create user... error with database", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Cannot create user... error with database",
+		})
 		return
 	}
 	delete(temporary_users, user_request.Email)

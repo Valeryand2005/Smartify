@@ -18,21 +18,32 @@ type TokenResponse struct {
 }
 
 func RefreshHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	var req RefreshRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid request",
+		})
 		return
 	}
 
 	claims, err := auth.ParseToken(req.RefreshToken)
 	if err != nil {
-		http.Error(w, "Invalid refresh token", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid refresh token",
+		})
 		return
 	}
 
 	valid, userID, err := database.IsRefreshTokenValid(req.RefreshToken, db)
 	if err != nil || !valid || claims.UserID != userID {
-		http.Error(w, "Refresh token expired or invalid", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Refresh token expired or invalid",
+		})
 		return
 	}
 
@@ -40,7 +51,10 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 
 	accessToken, newRefreshToken, err := auth.GenerateTokens(userID)
 	if err != nil {
-		http.Error(w, "Could not generate tokens", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Could not generate tokens",
+		})
 		return
 	}
 
