@@ -53,6 +53,10 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	// Добавляем токен и почту в список пользователей на восстановление
 	recovery_users[token] = request.Email
 
+	// Ответ об успехе
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Password reset link sent to your email"})
+
 	// Отправляем письмо
 	err = sendEmail(request.Email, "Recovery password", "Click to link to reset password: "+resetLink)
 	if err != nil {
@@ -63,11 +67,6 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
-	// Ответ об успехе
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Password reset link sent to your email"})
-	return
 }
 
 func ResetPassword(w http.ResponseWriter, r *http.Request) {

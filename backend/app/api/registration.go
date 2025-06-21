@@ -78,6 +78,14 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	// Add user in map
 	temporary_users[email.Email] = number
 
+	// Send successful answer
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Verification code sent",
+		"code":    http.StatusOK,
+	})
+
 	// Send number to email
 	err = sendEmail(email.Email, "Email Validation", number)
 	if err != nil {
@@ -88,14 +96,6 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 		})
 		return
 	}
-
-	// Send successful answer
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Verification code sent",
-		"code":    http.StatusOK,
-	})
 }
 
 func sendEmail(to, subject, body string) error {
