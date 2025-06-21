@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/authorization/authorization_page.dart';
 import 'package:smartify/pages/sign/sign_up_page.dart';
+import 'package:smartify/pages/nav/nav_page.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -69,6 +70,7 @@ class WelcomePage extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const SignUpPage(),
+                            //builder: (context) => const DashboardPage(),
                           ),
                         );
                       },
