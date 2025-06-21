@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smartify/pages/api_server/api_server.dart';
 import 'package:smartify/pages/menu/menu_page.dart';
 import 'package:smartify/pages/reset/reset_password_page.dart';
-
+import 'package:smartify/pages/nav/nav_page.dart';
 
 class AuthorizationPage extends StatefulWidget {
   const AuthorizationPage({super.key});
@@ -26,7 +26,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
       // Successful entry
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MenuPage()), 
+        MaterialPageRoute(builder: (context) => const DashboardPage()), 
       );
     } else {
       // Failed to log in
@@ -88,8 +88,8 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword
-                        ? Icons.visibility_off
-                        : Icons.visibility,
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
                   ),
                   onPressed: () {
                     setState(() {
