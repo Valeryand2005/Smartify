@@ -43,7 +43,7 @@ class _SignUpPageState extends State<SignUpPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         title: const Text(
-          'Log into account',
+          'Create new account',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,

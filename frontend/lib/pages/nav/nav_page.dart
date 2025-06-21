@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smartify/pages/universities/main_university_page.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -99,7 +100,14 @@ body: SafeArea(
                         title: 'Университеты',
                         subtitle: 'Более ста разных университетов',
                         assetImage: 'university.png',
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const UniversityPage(),
+                            ),
+                          );
+                        },
                         isDarkButton: false,
                       ),
                     ),
