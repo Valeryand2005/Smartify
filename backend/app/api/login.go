@@ -66,5 +66,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send successful answer
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }

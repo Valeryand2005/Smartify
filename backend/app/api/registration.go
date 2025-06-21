@@ -55,15 +55,6 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Check if the mail was used
-	if _, exists := temporary_users[email.Email]; exists {
-		log.Printf("User already exists")
-		w.WriteHeader(http.StatusConflict)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error": "User already exists",
-		})
-		return
-	}
-
 	if err := database.CheckUser(email.Email, db); err != nil {
 		log.Printf("User already exists")
 		w.WriteHeader(http.StatusConflict)
@@ -87,6 +78,14 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	// Add user in map
 	temporary_users[email.Email] = number
 
+	// Send successful answer
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Verification code sent",
+		"code":    http.StatusOK,
+	})
+
 	// Send number to email
 	err = sendEmail(email.Email, "Email Validation", number)
 	if err != nil {
@@ -97,13 +96,6 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 		})
 		return
 	}
-
-	// Send successful answer
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Verification code sent",
-		"code":    http.StatusOK,
-	})
 }
 
 func sendEmail(to, subject, body string) error {
@@ -177,7 +169,7 @@ func RegistrationHandler_CodeValidation(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Отправляем успешный ответ
-	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "Code Verified",
@@ -233,6 +225,7 @@ func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	delete(temporary_users, user_request.Email)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "Password was created",
