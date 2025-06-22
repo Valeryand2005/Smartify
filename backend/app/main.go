@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api"
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api_email"
 )
 
 func main() {
@@ -53,6 +54,7 @@ func main() {
 		return
 	}
 
+	api_email.InitEmailApi(db)
 	api.InitDatabase(db)
 
 	log.Println("Server started on :8080")

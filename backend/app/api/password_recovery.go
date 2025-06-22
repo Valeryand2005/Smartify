@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api_email"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
 )
 
@@ -58,15 +59,17 @@ func PasswordRecovery_ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	// Добавляем пользователя в список
 	recovery_users[request.Email] = email_code
 
+	// Отправляем письмо (3 попытки)
+	api_email.EmailQueue <- api_email.EmailTask{
+		To:      request.Email,
+		Subject: "Email Validation",
+		Body:    email_code,
+		Retries: 3,
+	}
+
 	// Ответ об успехе
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Password reset link sent to your email"})
-
-	// Отправляем письмо
-	err = sendEmail(request.Email, "Recovery password", "Enter code in the App: "+email_code)
-	if err != nil {
-		log.Println("Cant send mail")
-	}
+	json.NewEncoder(w).Encode(map[string]string{"code": "OK"})
 }
 
 func PasswordRecovery_CommitCode(w http.ResponseWriter, r *http.Request) {

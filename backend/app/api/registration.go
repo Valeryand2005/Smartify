@@ -8,38 +8,14 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"net/smtp"
-	"sync"
 	"time"
 
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api_email"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
 )
 
 var db *sql.DB
 var temporary_users = make(map[string]string)
-var emailQueue chan EmailTask
-var wg sync.WaitGroup
-
-type EmailTask struct {
-	To      string
-	Subject string
-	Body    string
-	Retries int
-}
-
-func processEmailQueue() {
-	for task := range emailQueue {
-		wg.Add(1)
-		go func(t EmailTask) {
-			defer wg.Done()
-			err := sendEmailWithRetry(t.To, t.Subject, t.Body, t.Retries)
-			if err != nil {
-				log.Printf("Failed to send email to %s after %d retries: %v", t.To, t.Retries, err)
-				// Здесь можно добавить сохранение в БД для повторной попытки позже
-			}
-		}(task)
-	}
-}
 
 func InitDatabase(db_ *sql.DB) {
 	db = db_
@@ -102,50 +78,19 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	// Add user in map
 	temporary_users[email.Email] = number
 
+	// Send number to email (3 attempts)
+	api_email.EmailQueue <- api_email.EmailTask{
+		To:      email.Email,
+		Subject: "Email Validation",
+		Body:    number,
+		Retries: 3,
+	}
+
 	// Send successful answer
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"code": http.StatusOK,
 	})
-
-	// Send number to email
-	err = sendEmail(email.Email, "Email Validation", number)
-	if err != nil {
-		log.Printf("Cannot send message: %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error": "Cannot send verification email",
-		})
-		return
-	}
-}
-
-func sendEmail(to, subject, body string) error {
-	// Настройки SMTP-сервера
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
-	smtpUsername := "projectsmartifyapp@gmail.com"
-	smtpPassword := "iegn yhso uqye ikrm"
-
-	// Формируем письмо
-	msg := []byte(
-		"To: " + to + "\r\n" +
-			"Subject: " + subject + "\r\n" +
-			"\r\n" +
-			body + "\r\n",
-	)
-
-	// Аутентификация и отправка
-	auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpHost)
-	err := smtp.SendMail(
-		smtpHost+":"+smtpPort,
-		auth,
-		smtpUsername,
-		[]string{to},
-		msg,
-	)
-
-	return err
 }
 
 // Для второго этапа регистрации (Подтверждение кода)
