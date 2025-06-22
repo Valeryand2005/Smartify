@@ -11,22 +11,32 @@ import (
 )
 
 func main() {
-	// register API-route
+	// Вход в аккаунт
 	http.HandleFunc("/api/login", api.LoginHandler)
+
+	// Регистрация аккаунта
 	http.HandleFunc("/api/registration_emailvalidation", api.RegistrationHandler_EmailValidation)
 	http.HandleFunc("/api/registration_codevalidation", api.RegistrationHandler_CodeValidation)
 	http.HandleFunc("/api/registration_password", api.RegistrationHandler_Password)
-	http.HandleFunc("/api/forgot_password", api.ForgotPassword)
-	http.HandleFunc("/api/reset_password", api.ResetPassword)
+
+	// Восстановление пароля
+	http.HandleFunc("/api/forgot_password", api.PasswordRecovery_ForgotPassword)
+	http.HandleFunc("/api/reset_password", api.PasswordRecovery_ResetPassword)
+	http.HandleFunc("/api/commit_code_reset_password", api.PasswordRecovery_CommitCode)
+
+	// Обновление токена
 	http.HandleFunc("/api/refresh", api.RefreshHandler)
 
-	http.Handle("/reset_password_page/",
-		http.StripPrefix("/reset_password_page/",
-			http.FileServer(http.Dir("html_pages/reset_password_page"))))
+	// Для подтверждения по ссылке
+	/* -----------------------------------------------------------------------
+		http.Handle("/reset_password_page/",
+			http.StripPrefix("/reset_password_page/",
+				http.FileServer(http.Dir("html_pages/reset_password_page"))))
 
-	http.Handle("/success_page/",
-		http.StripPrefix("/success_page/",
-			http.FileServer(http.Dir("html_pages/success_page"))))
+		http.Handle("/success_page/",
+			http.StripPrefix("/success_page/",
+				http.FileServer(http.Dir("html_pages/success_page"))))
+	------------------------------------------------------------------------ */
 
 	// Init database
 	db, err := sql.Open("postgres", fmt.Sprintf(

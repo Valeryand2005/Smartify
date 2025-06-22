@@ -6,15 +6,14 @@ import (
 	"net/http"
 
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
-	"github.com/google/uuid"
 )
 
-const DOMAIN = "localhost"
-const PORT = "22025"
+// const DOMAIN = "localhost"
+// const PORT = "22025"
 
 var recovery_users = make(map[string]string)
 
-func ForgotPassword(w http.ResponseWriter, r *http.Request) {
+func PasswordRecovery_ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request to recovery password!")
 	w.Header().Set("Content-Type", "application/json")
 
@@ -44,37 +43,81 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// --------------------ВВЕРСИЯ С УНИКАЛЬНОЙ ССЫЛКОЙ------------------------------
 	// Генерируем токен
-	token := uuid.New().String()
-
+	// token := uuid.New().String()
 	// Создаем ссылку для востановления пароля
-	resetLink := "http://" + DOMAIN + ":" + PORT + "/reset_password_page?token=" + token
-
+	// resetLink := "http://" + DOMAIN + ":" + PORT + "/reset_password_page?token=" + token
 	// Добавляем токен и почту в список пользователей на восстановление
-	recovery_users[token] = request.Email
+	//recovery_users[token] = request.Email
+	// ------------------------------------------------------------------------------
+
+	// Генерируем код
+	email_code, err := Generate5DigitCode()
+
+	// Добавляем пользователя в список
+	recovery_users[request.Email] = email_code
 
 	// Ответ об успехе
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Password reset link sent to your email"})
 
 	// Отправляем письмо
-	err = sendEmail(request.Email, "Recovery password", "Click to link to reset password: "+resetLink)
+	err = sendEmail(request.Email, "Recovery password", "Enter code in the App: "+email_code)
 	if err != nil {
 		log.Println("Cant send mail")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error": "Cant send mail",
-		})
-		return
 	}
 }
 
-func ResetPassword(w http.ResponseWriter, r *http.Request) {
+func PasswordRecovery_CommitCode(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request to recovery password!")
 	w.Header().Set("Content-Type", "application/json")
 
 	var request struct {
-		Token       string `json:"token"`
+		Email string `json:"email"`
+		Code  string `json:"code"`
+	}
+
+	// Расшифровываем сообщение
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		log.Println("Cannot decode request")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid JSON",
+		})
+	}
+
+	// Ищем пользователя по почте
+	code := recovery_users[request.Email]
+	if code == "" {
+		log.Println("User not found")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "User not found",
+		})
+	}
+
+	// Проверяем код
+	if code != request.Code {
+		log.Println("Code is incorrect")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Code is incorrect",
+		})
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"type": "OK",
+	})
+}
+
+func PasswordRecovery_ResetPassword(w http.ResponseWriter, r *http.Request) {
+	log.Println("Request to recovery password!")
+	w.Header().Set("Content-Type", "application/json")
+
+	var request struct {
+		Email       string `json:"email"`
 		NewPassword string `json:"newPassword"`
 	}
 
@@ -89,8 +132,8 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Ищем пользователя по токену
-	email := recovery_users[request.Token]
-	if email == "" {
+	code := recovery_users[request.Email]
+	if code == "" {
 		log.Println("User not found")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{
@@ -99,7 +142,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Обновляем пароль в базе данных
-	err = database.UpdateUsersPassword(email, request.NewPassword, db)
+	err = database.UpdateUsersPassword(request.Email, request.NewPassword, db)
 	if err != nil {
 		log.Println("Cannot update password")
 		w.WriteHeader(http.StatusBadRequest)
@@ -108,8 +151,8 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	// Удаляем использованный токен
-	delete(recovery_users, request.Token)
+	// Удаляем использованный код
+	delete(recovery_users, request.Email)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
 		"type": "OK",

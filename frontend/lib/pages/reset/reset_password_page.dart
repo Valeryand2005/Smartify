@@ -149,19 +149,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () async {
-              /*
-              final success = await ApiService.registration_emailValidation(
+              final success = await ApiService.forgot_password(
                 emailController.text
               );
               if (success) {
-                setState(() => currentStep = 1);
+                _nextStep();
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Ошибка с почтой!")),
                 );
               }
-              */
-              _nextStep();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF54D0C0),
@@ -258,20 +255,17 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               ),
             ),
             onPressed: () async {
-              /*
-              final success = await ApiService.registration_codeValidation(
+              final success = await ApiService.resetPassword_codeValidation(
                 emailController.text,
                 codeController.text,
               );
               if (success) {
-                setState(() => currentStep = 2);
+                _nextStep();
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Неверный код или ошибка подключения")),
                 );
               }
-              */
-              _nextStep();
             },
             child: const Text("Verify email", style: TextStyle(color: Colors.white)),
           ),
@@ -367,17 +361,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         child: ElevatedButton(
           onPressed: passwordStrength == 1.0
           ? () async {
-            /*
-              final success = await ApiService.registration_password(emailController.text, passwordController.text);
+              final success = await ApiService.resetPassword_resetPassword(emailController.text, passwordController.text);
               if (success) {
-                setState(() => currentStep = 3); 
+                _nextStep();
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Ошибка регистрации")),
                 );
               }
-              */
-              _nextStep();
             }
           : null,
           style: ElevatedButton.styleFrom(

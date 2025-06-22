@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"net/http"
 	"net/smtp"
+	"sync"
 	"time"
 
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
@@ -16,6 +17,29 @@ import (
 
 var db *sql.DB
 var temporary_users = make(map[string]string)
+var emailQueue chan EmailTask
+var wg sync.WaitGroup
+
+type EmailTask struct {
+	To      string
+	Subject string
+	Body    string
+	Retries int
+}
+
+func processEmailQueue() {
+	for task := range emailQueue {
+		wg.Add(1)
+		go func(t EmailTask) {
+			defer wg.Done()
+			err := sendEmailWithRetry(t.To, t.Subject, t.Body, t.Retries)
+			if err != nil {
+				log.Printf("Failed to send email to %s after %d retries: %v", t.To, t.Retries, err)
+				// Здесь можно добавить сохранение в БД для повторной попытки позже
+			}
+		}(task)
+	}
+}
 
 func InitDatabase(db_ *sql.DB) {
 	db = db_
@@ -81,9 +105,7 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	// Send successful answer
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Verification code sent",
-		"code":    http.StatusOK,
+		"code": http.StatusOK,
 	})
 
 	// Send number to email
@@ -171,9 +193,7 @@ func RegistrationHandler_CodeValidation(w http.ResponseWriter, r *http.Request) 
 	// Отправляем успешный ответ
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Code Verified",
-		"code":    http.StatusOK,
+		"code": http.StatusOK,
 	})
 }
 
@@ -227,9 +247,7 @@ func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 	delete(temporary_users, user_request.Email)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Password was created",
-		"code":    http.StatusOK,
+		"code": http.StatusOK,
 	})
 }
 
