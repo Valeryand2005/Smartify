@@ -120,4 +120,48 @@ class ApiService {
       return false;
     }
   }
+  static Future<bool> resetPassword_codeValidation(String email, String code)async {
+    try {
+      final response = await http.post(
+      Uri.parse('$_baseUrl/commit_code_reset_password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'email': email,
+        'code': code
+      }));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return true;
+      } else {
+        final data = jsonDecode(response.body);
+        return false;
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return false;
+    }
+  }
+  static Future<bool> resetPassword_resetPassword(String email, String password)async {
+    try {
+      final response = await http.post(
+      Uri.parse('$_baseUrl/reset_password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'email': email,
+        'newPassword': password
+      }));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return true;
+      } else {
+        final data = jsonDecode(response.body);
+        return false;
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return false;
+    }
+  }
 }
