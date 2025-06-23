@@ -23,9 +23,11 @@ services:
       - "27018:27017"
     volumes:
       - mongo_data:/data/db
+      - ./database:/docker-entrypoint-initdb.d
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=smartify
     restart: always
     networks:
       - internal
@@ -47,6 +49,7 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=smartify
       - DB_PORT=5432
+      - MONGO_URI=mongodb://root:root@mongo:27017/admin
     container_name: backend
     restart: always
     networks:

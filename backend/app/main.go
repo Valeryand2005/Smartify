@@ -9,6 +9,7 @@ import (
 
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api_email"
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
 )
 
 func main() {
@@ -56,6 +57,17 @@ func main() {
 
 	api_email.InitEmailApi(db)
 	api.InitDatabase(db)
+
+	mongoURI := os.Getenv("MONGO_URI")
+	mongoClient, err := database.ConnectMongo(mongoURI)
+	if err != nil {
+		log.Fatalf("Could not connect to MongoDB: %v", err)
+	} else {
+		err := database.CheckConnection(mongoClient)
+		if err != nil {
+			log.Fatalf("Connection is lost: %v", err)
+		}
+	}
 
 	log.Println("Server started on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
