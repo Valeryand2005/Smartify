@@ -27,7 +27,7 @@ func main() {
 	http.HandleFunc("/api/commit_code_reset_password", api.PasswordRecovery_CommitCode)
 
 	// Обновление токена
-	http.HandleFunc("/api/refresh", api.RefreshHandler)
+	http.HandleFunc("/api/refresh_token", api.RefreshHandler)
 
 	// Для подтверждения по ссылке
 	/* -----------------------------------------------------------------------

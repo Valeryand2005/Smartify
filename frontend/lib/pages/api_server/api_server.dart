@@ -164,4 +164,23 @@ class ApiService {
       return false;
     }
   }
+  static Future<Map<String, String>> fetchNewAccessToken(String refreshToken) async {
+    try {
+      final response = await http.post(
+      Uri.parse('$_baseUrl/refresh_token'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'refresh_token': refreshToken
+      }));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return {};
+    }
+  }
 }
