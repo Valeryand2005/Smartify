@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,6 +21,22 @@ type University struct {
 	TimeStamp time.Time          `bson:"timestamp" json:"timestamp"`
 
 	ExtraData map[string]interface{} `bson:",extraelements" json:"extra_data,omitempty"`
+}
+
+type Profession struct {
+	Name            string    `json:"name" bson:"name"`
+	Description     string    `json:"description" bson:"description"`
+	EgeSubjects     []string  `json:"ege_subjects" bson:"ege_subjects"`
+	MBTITypes       string    `json:"mbti_types" bson:"mbti_types"`
+	Interests       []string  `json:"interests" bson:"interests"`
+	Values          []string  `json:"values" bson:"values"`
+	Role            string    `json:"role" bson:"role"`
+	Place           string    `json:"place" bson:"place"`
+	Style           string    `json:"style" bson:"style"`
+	EducationLevel  string    `json:"education_level" bson:"education_level"`
+	SalaryRange     string    `json:"salary_range" bson:"salary_range"`
+	GrowthProspects string    `json:"growth_prospects" bson:"growth_prospects"`
+	TimeStamp       time.Time `bson:"timestamp" json:"timestamp"`
 }
 
 func ConnectMongo(uri string) (*mongo.Client, error) {
@@ -84,5 +101,33 @@ func AddUniversity(data map[string]interface{}) error {
 		return err
 	}
 	log.Println("Successfully inserted university!")
+	return nil
+}
+
+func AddProfession(profession Profession) error {
+	collection := mongoClient.Database("smartify").Collection("professions")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	if profession.TimeStamp.IsZero() {
+		profession.TimeStamp = time.Now()
+	}
+
+	var existing Profession
+	err := collection.FindOne(ctx, bson.M{"name": profession.Name}).Decode(&existing)
+
+	if err == mongo.ErrNoDocuments {
+	} else if err != nil {
+		return err
+	} else if profession.TimeStamp.After(existing.TimeStamp) {
+		_, updateErr := collection.ReplaceOne(ctx, bson.M{"name": profession.Name}, profession)
+		return updateErr
+	}
+
+	_, err1 := collection.InsertOne(ctx, profession)
+	if err1 != nil {
+		return err
+	}
+	log.Println("Successfully inserted profession!")
 	return nil
 }
