@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/universities/main_university_page.dart';
 import 'package:smartify/pages/account/account_page.dart';
+import 'package:smartify/pages/tests/prof_test_page.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -200,7 +201,15 @@ class _DashboardPageState extends State<DashboardPage> {
                               title: 'Карьерные\nПредложения',
                               subtitle: 'Выбери то, что подходит тебе',
                               assetImage: 'career.png',
-                              onPressed: () {},
+                              onPressed: () {
+                                  Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const QuestionnairePage(),
+                                  ),
+                                );
+                              },
                               isDarkButton: true,
                             ),
                           ),
