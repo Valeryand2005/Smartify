@@ -66,6 +66,7 @@ flutter:
       - university.png
       - career.png
       - assets/universities.json
+      - assets/user_avatar.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
