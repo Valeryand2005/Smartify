@@ -6,7 +6,6 @@ import 'package:smartify/pages/universities/filter_page.dart';
 import 'package:smartify/pages/universities/uniDetPAge.dart';
 import 'package:smartify/pages/universities/universityCard.dart';
 
-
 class UniversityPage extends StatefulWidget {
   const UniversityPage({super.key});
 
@@ -93,7 +92,7 @@ class _UniversityPageState extends State<UniversityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
