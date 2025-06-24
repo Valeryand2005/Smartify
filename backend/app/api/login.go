@@ -5,11 +5,13 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/auth"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("New connection!")
+	w.Header().Set("Content-Type", "application/json")
 
 	var user database.User
 	// Try to decode message
@@ -17,7 +19,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println("Cannot decode request")
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid JSON",
+		})
 		return
 	}
 
@@ -25,17 +30,42 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("User: %s, %s", user.Email, user.Password_hash)
 
 	// Find user in database
-	err = database.FindUser(user.Email, user.Password_hash, &user, db)
+	err = database.FindAndCheckUser(user.Email, user.Password_hash, &user, db)
 	if err != nil {
 		log.Printf("Cannot write in database: %s", err)
-		http.Error(w, "Account will not be found...", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Account will not be found...",
+		})
 		return
 	}
 
-	// Generate Token for user
-	token := map[string]string{"token": "fake_jwt_token_123"}
+	accessToken, refreshToken, err := auth.GenerateTokens(user.ID)
+	if err != nil {
+		log.Printf("Cannot generate tokens: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Error generating tokens",
+		})
+		return
+	}
+
+	err = database.StoreRefreshToken(user.ID, refreshToken, db)
+	if err != nil {
+		log.Printf("Cannot store refresh token: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Error saving refresh token",
+		})
+		return
+	}
+
+	resp := map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	}
 
 	// Send successful answer
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(token)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(resp)
 }

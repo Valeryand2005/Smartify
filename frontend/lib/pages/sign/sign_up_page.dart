@@ -3,7 +3,6 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:smartify/pages/authorization/authorization_page.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
 import 'package:smartify/pages/api_server/api_server.dart';
-import 'dart:convert';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -29,14 +28,29 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Color get strengthColor {
-    if (passwordStrength < 0.34) return Colors.red;
-    if (passwordStrength < 0.67) return Colors.orange;
-    return Colors.green;
+    if (passwordStrength < 0.34) return const Color.fromRGBO(214, 44, 1, 1);
+    if (passwordStrength < 0.67) return const Color.fromRGBO(250, 174, 22, 1);
+    return const Color.fromRGBO(73, 130, 0, 1);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        title: const Text(
+          'Log into account',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -72,18 +86,6 @@ class _SignUpPageState extends State<SignUpPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 20),
-        IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const WelcomePage(),
-              ),
-            );
-          },
-        ),
         const SizedBox(height: 10),
         Center(
           child: Column(
@@ -118,26 +120,14 @@ class _SignUpPageState extends State<SignUpPage> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () async {
-              // Проверка на пустой email
-              if (emailController.text.isEmpty || !emailController.text.contains('@')) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Введите корректный email')),
-                );
-                return;
-              }
-
-              // Отправка email на сервер
-              final response = await ApiService.registration_emailValidation(emailController.text);
-
-              // Если ответ успешный (200) - переходим к шагу 2
-              if (response.statusCode == 200) {
+              final success = await ApiService.registration_emailValidation(
+                emailController.text
+              );
+              if (success) {
                 setState(() => currentStep = 1);
-              } 
-              // Если ошибка - показываем сообщение
-              else {
-                final error = jsonDecode(response.body)['message'] ?? 'Ошибка сервера';
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(error)),
+                  SnackBar(content: Text("Ошибка с почтой!")),
                 );
               }
             },
@@ -151,6 +141,27 @@ class _SignUpPageState extends State<SignUpPage> {
             child: const Text("Create an account", style: TextStyle(color: Colors.white)),
           ),
         ),
+        const Spacer(),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Text.rich(
+                  TextSpan(
+                    text: 'By using Smartify, you agree to the\n',
+                    style: const TextStyle(fontSize: 12),
+                    children: [
+                      TextSpan(
+                        text: 'Terms and Privacy Policy.',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
       ],
     );
   }
@@ -159,11 +170,6 @@ class _SignUpPageState extends State<SignUpPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(height: 20),
-        const Align(
-          alignment: Alignment.centerLeft,
-          child: Icon(Icons.arrow_back, size: 24),
-        ),
         const SizedBox(height: 10),
         const Text(
           "Verify your email 2 / 3",
@@ -187,32 +193,44 @@ class _SignUpPageState extends State<SignUpPage> {
           style: const TextStyle(fontSize: 15),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 30),
-        const Align(
-          alignment: Alignment.centerLeft,
-          child: Text("Code", style: TextStyle(fontWeight: FontWeight.w500)),
-        ),
-        const SizedBox(height: 10),
-        PinCodeTextField(
-          length: 5,
-          obscureText: false,
-          animationType: AnimationType.fade,
-          keyboardType: TextInputType.number,
-          pinTheme: PinTheme(
-            shape: PinCodeFieldShape.box,
-            borderRadius: BorderRadius.circular(10),
-            fieldHeight: 50,
-            fieldWidth: 50,
-            activeColor: Colors.teal,
-            selectedColor: Colors.teal,
-            inactiveColor: Colors.grey.shade300,
+        
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 350),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, // aligns everything to the left
+              children: [
+                const Text(
+                  "Code",
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8), // spacing between label and pin field
+                PinCodeTextField(
+                  length: 5,
+                  obscureText: false,
+                  animationType: AnimationType.fade,
+                  keyboardType: TextInputType.number,
+                  pinTheme: PinTheme(
+                    shape: PinCodeFieldShape.box,
+                    borderRadius: BorderRadius.circular(10),
+                    fieldHeight: 48,
+                    fieldWidth: 65.4,
+                    activeColor: Colors.grey.shade300,
+                    selectedColor: Colors.teal,
+                    inactiveColor: Colors.grey.shade300,
+                  ),
+                  animationDuration: const Duration(milliseconds: 300),
+                  enableActiveFill: false,
+                  controller: codeController,
+                  onChanged: (value) {},
+                  appContext: context,
+                ),
+              ],
+            ),
           ),
-          animationDuration: const Duration(milliseconds: 300),
-          enableActiveFill: false,
-          controller: codeController,
-          onChanged: (value) {},
-          appContext: context,
         ),
+
+
         const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
@@ -225,18 +243,16 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
             ),
             onPressed: () async {
-              final response = await ApiService.registration_codeValidation(
-                  emailController.text, 
-                  codeController.text
+              final success = await ApiService.registration_codeValidation(
+                emailController.text,
+                codeController.text,
               );
-
-              if (response.statusCode == 200) {
-                  setState(() => currentStep = 2);
+              if (success) {
+                setState(() => currentStep = 2);
               } else {
-                  final error = jsonDecode(response.body)['message'] ?? 'Invalid code';
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(error)),
-                  );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Неверный код или ошибка подключения")),
+                );
               }
             },
             child: const Text("Verify email", style: TextStyle(color: Colors.white)),
@@ -245,7 +261,12 @@ class _SignUpPageState extends State<SignUpPage> {
         const SizedBox(height: 20),
         GestureDetector(
           onTap: () {
-            setState(() => currentStep = 0);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SignUpPage(),
+              ),
+            ); // <-- This closing parenthesis was missing
           },
           child: const Text.rich(
             TextSpan(
@@ -260,7 +281,26 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         ),
         const Spacer(),
-        _termsText(),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Text.rich(
+                  TextSpan(
+                    text: 'By using Smartify, you agree to the\n',
+                    style: const TextStyle(fontSize: 12),
+                    children: [
+                      TextSpan(
+                        text: 'Terms and Privacy Policy.',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
       ],
     );
   }
@@ -280,14 +320,6 @@ Widget _buildPasswordStep() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const SizedBox(height: 20),
-      Align(
-        alignment: Alignment.centerLeft,
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => setState(() => currentStep = 1),
-        ),
-      ),
       const SizedBox(height: 10),
       Center(
         child: Column(
@@ -310,7 +342,7 @@ Widget _buildPasswordStep() {
         onChanged: (_) => setState(() {}),
         decoration: InputDecoration(
           suffixIcon: IconButton(
-            icon: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off),
+            icon: Icon(isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined),
             onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
           ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -318,11 +350,14 @@ Widget _buildPasswordStep() {
         ),
       ),
       const SizedBox(height: 10),
-      LinearProgressIndicator(
-        value: passwordStrength,
-        backgroundColor: Colors.grey[300],
-        valueColor: AlwaysStoppedAnimation<Color>(strengthColor),
-        minHeight: 6,
+      ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: LinearProgressIndicator(
+          value: passwordStrength,
+          backgroundColor: Colors.grey[300],
+          valueColor: AlwaysStoppedAnimation<Color>(strengthColor),
+          minHeight: 8,
+        ),
       ),
       const SizedBox(height: 16),
       _buildCriteria("8 characters minimum", hasMinLength),
@@ -332,21 +367,18 @@ Widget _buildPasswordStep() {
       SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: passwordStrength == 1.0 ? () async {
-              final response = await ApiService.registration_password(
-                  emailController.text,
-                  passwordController.text
-              );
-
-              if (response.statusCode == 200) {
-                  setState(() => currentStep = 3);
+          onPressed: passwordStrength == 1.0
+          ? () async {
+              final success = await ApiService.registration_password(emailController.text, passwordController.text);
+              if (success) {
+                setState(() => currentStep = 3); 
               } else {
-                  final error = jsonDecode(response.body)['message'] ?? 'Registration failed';
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(error)),
-                  );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Ошибка регистрации")),
+                );
               }
-          } : null,
+            }
+          : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: passwordStrength == 1.0 ? const Color(0xFF54D0C0) : const Color(0xFFB2DFDB),
             foregroundColor: Colors.white,
@@ -357,8 +389,27 @@ Widget _buildPasswordStep() {
           child: const Text("Continue"),
         ),
       ),
-      const SizedBox(height: 20),
-      _termsText(),
+      const Spacer(),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Text.rich(
+                  TextSpan(
+                    text: 'By using Smartify, you agree to the\n',
+                    style: const TextStyle(fontSize: 12),
+                    children: [
+                      TextSpan(
+                        text: 'Terms and Privacy Policy.',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
     ],
   );
 }
@@ -366,7 +417,7 @@ Widget _buildPasswordStep() {
   Widget _buildCriteria(String label, bool met) {
     return Row(
       children: [
-        Icon(met ? Icons.check_circle : Icons.radio_button_unchecked, color: met ? Colors.green : Colors.grey),
+        Icon(met ? Icons.check_circle_rounded : Icons.radio_button_unchecked, color: met ? const Color.fromRGBO(73, 130, 0, 1) : Colors.grey),
         const SizedBox(width: 8),
         Text(label, style: TextStyle(fontWeight: FontWeight.w500, color: met ? Colors.black : Colors.grey)),
       ],
@@ -374,58 +425,72 @@ Widget _buildPasswordStep() {
   }
 
   Widget _buildSuccessStep() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.check_circle, size: 64, color: Colors.teal),
-        const SizedBox(height: 24),
-        const Text(
-          "Your account was successfully created!",
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  return Column(
+    children: [
+      Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check, size: 40, color: Color.fromRGBO(21, 203, 189, 1)),
+            const SizedBox(height: 24),
+            const Text(
+              "Your account was successfully created!",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              "Only one click to explore education.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AuthorizationPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF54D0C0),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text("Log in", style: TextStyle(color: Colors.white)),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
-        const Text(
-          "Only one click to explore education.",
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AuthorizationPage(),
-                ),
-              );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF54D0C0),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            minimumSize: const Size.fromHeight(48),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          child: const Text("Log in", style: TextStyle(color: Colors.white)),
-        ),
-        const SizedBox(height: 20),
-        _termsText(),
-      ],
-    );
-  }
-
-  Widget _termsText() {
-    return const Text.rich(
-      TextSpan(
-        text: "By using Smartify, you agree to the ",
-        children: [
-          TextSpan(
-              text: "Terms and Privacy Policy.",
-              style: TextStyle(fontWeight: FontWeight.bold)),
-        ],
       ),
-      textAlign: TextAlign.center,
-      style: TextStyle(fontSize: 12),
-    );
-  }
+      Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: Text.rich(
+          TextSpan(
+            text: 'By using Smartify, you agree to the\n',
+            style: const TextStyle(fontSize: 12),
+            children: [
+              TextSpan(
+                text: 'Terms and Privacy Policy.',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ],
+  );
+}
+@override
+void dispose() {
+  emailController.dispose();
+  codeController.dispose();
+  passwordController.dispose();
+  super.dispose();
+}
 }

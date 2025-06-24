@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/api_server/api_server.dart';
 import 'package:smartify/pages/menu/menu_page.dart';
+import 'package:smartify/pages/reset/reset_password_page.dart';
+import 'package:smartify/pages/nav/nav_page.dart';
 
 class AuthorizationPage extends StatefulWidget {
   const AuthorizationPage({super.key});
@@ -20,16 +22,16 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
       _passwordController.text
     );
 
-    if (response.statusCode == 200) {
+    if (response) {
       // Successful entry
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MenuPage()), 
+        MaterialPageRoute(builder: (context) => const DashboardPage()), 
       );
     } else {
       // Failed to log in
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response.body}')),
+        SnackBar(content: Text('Some Error')),
       );
     }
   }
@@ -86,8 +88,8 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword
-                        ? Icons.visibility_off
-                        : Icons.visibility,
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
                   ),
                   onPressed: () {
                     setState(() {
@@ -106,11 +108,11 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
               child: ElevatedButton(
                 onPressed: _login, // TODO: логика входа
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.tealAccent.shade100,
-                  foregroundColor: Colors.black87,
+                  backgroundColor: const Color(0xFF54D0C0),
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
@@ -123,7 +125,12 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             Center(
               child: TextButton(
                 onPressed: () {
-                  // TODO: восстановление пароля
+                  Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ResetPasswordPage(),
+                        ),
+                  );
                 },
                 child: const Text(
                   'Forgot password?',
