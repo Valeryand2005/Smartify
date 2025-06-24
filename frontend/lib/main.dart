@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/menu/menu_page.dart';
+import 'package:smartify/pages/tracker/main_tracker_page.dart';
 import 'package:smartify/pages/universities/main_university_page.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
 import 'package:smartify/pages/nav/nav_page.dart';
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const WelcomePage(),
       //home: const DashboardPage(),
+
     );
   }
 }

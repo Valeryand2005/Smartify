@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:smartify/pages/universities/filter.dart';
+import 'package:smartify/pages/universities/filter_page.dart';
 import 'package:smartify/pages/universities/uniDetPAge.dart';
-import 'package:smartify/pages/universities/universityCard.dart';
 import 'package:smartify/pages/universities/universityCard.dart';
 
 class UniversityPage extends StatefulWidget {
@@ -15,6 +16,7 @@ class UniversityPage extends StatefulWidget {
 class _UniversityPageState extends State<UniversityPage> {
   List universities = [];
   List filteredUniversities = [];
+  UniversityFilter activeFilter = UniversityFilter(); // хранение активных фильтров
 
   @override
   void initState() {
@@ -42,6 +44,51 @@ class _UniversityPageState extends State<UniversityPage> {
     });
   }
 
+  void applyFilters(UniversityFilter filter) {
+    final filtered = universities.where((uni) {
+      // РЕГИОН
+      if (filter.regions.isNotEmpty && !filter.regions.contains(uni['город'])) {
+        return false;
+      }
+
+      // РЕЙТИНГ
+      double rating = double.tryParse(uni['рейтинг'].toString()) ?? 0.0;
+      if (rating < filter.minRating) {
+        return false;
+      }
+
+      // ОБЩЕЖИТИЕ
+      if (filter.hasDorm && uni['общежитие'] != 'Да') {
+        return false;
+      }
+
+      // ВОЕННЫЙ УЧ. ЦЕНТР
+      if (filter.hasMilitary && uni['воен. уч. центр'] != 'Да') {
+        return false;
+      }
+
+      return true;
+    }).toList();
+
+    setState(() {
+      activeFilter = filter;
+      filteredUniversities = filtered;
+    });
+  }
+
+  Future<void> openFilterPage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UniversityFilterPage(currentFilter: activeFilter),
+      ),
+    );
+
+    if (result is UniversityFilter) {
+      applyFilters(result);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +98,7 @@ class _UniversityPageState extends State<UniversityPage> {
         elevation: 0,
         leading: const Icon(Icons.menu, color: Colors.black),
         centerTitle: true,
-        title: const Text('Universities', style: TextStyle(color: Colors.black)),
+        title: const Text('Университеты', style: TextStyle(color: Colors.black)),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -75,7 +122,7 @@ class _UniversityPageState extends State<UniversityPage> {
                         child: TextField(
                           onChanged: filterSearch,
                           decoration: InputDecoration(
-                            hintText: 'Search...',
+                            hintText: 'Поиск...',
                             prefixIcon: const Icon(Icons.search),
                             contentPadding: const EdgeInsets.symmetric(vertical: 12),
                             border: OutlineInputBorder(
@@ -94,9 +141,7 @@ class _UniversityPageState extends State<UniversityPage> {
                         backgroundColor: Colors.teal[300],
                         child: IconButton(
                           icon: const Icon(Icons.tune, color: Colors.white, size: 20),
-                          onPressed: () {
-                            // TODO: add filter logic
-                          },
+                          onPressed: openFilterPage,
                         ),
                       ),
                     ],
