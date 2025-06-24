@@ -55,10 +55,10 @@ type Questionnaire struct {
 }
 
 type WorkPreferences struct {
-	Role    string   `json:"role" bson:"role"`
-	Place   string   `json:"place" bson:"place"`
-	Style   string   `json:"style" bson:"style"`
-	Exclude []string `json:"exclude" bson:"exclude"`
+	Role    string `json:"role" bson:"role"`
+	Place   string `json:"place" bson:"place"`
+	Style   string `json:"style" bson:"style"`
+	Exclude string `json:"exclude" bson:"exclude"`
 }
 
 func ConnectMongo(uri string) (*mongo.Client, error) {
