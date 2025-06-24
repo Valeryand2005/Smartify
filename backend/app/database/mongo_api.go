@@ -39,6 +39,28 @@ type Profession struct {
 	TimeStamp       time.Time `bson:"timestamp" json:"timestamp"`
 }
 
+type Questionnaire struct {
+	UserID           string          `json:"user_id" bson:"user_id"`
+	Class            string          `json:"class" bson:"class"`
+	Region           string          `json:"region" bson:"region"`
+	AvgGrade         string          `json:"avg_grade" bson:"avg_grade"`
+	FavoriteSubjects []string        `json:"favorite_subjects" bson:"favorite_subjects"`
+	HardSubjects     []string        `json:"hard_subjects" bson:"hard_subjects"`
+	SubjectScores    map[string]int  `json:"subject_scores" bson:"subject_scores"`
+	Interests        []string        `json:"interests" bson:"interests"`
+	Values           []string        `json:"values" bson:"values"`
+	MBTIScores       map[string]int  `json:"mbti_scores" bson:"mbti_scores"`
+	WorkPreferences  WorkPreferences `json:"work_preferences" bson:"work_preferences"`
+	TimeStamp        time.Time       `bson:"timestamp" json:"timestamp"`
+}
+
+type WorkPreferences struct {
+	Role    string   `json:"role" bson:"role"`
+	Place   string   `json:"place" bson:"place"`
+	Style   string   `json:"style" bson:"style"`
+	Exclude []string `json:"exclude" bson:"exclude"`
+}
+
 func ConnectMongo(uri string) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -117,17 +139,53 @@ func AddProfession(profession Profession) error {
 	err := collection.FindOne(ctx, bson.M{"name": profession.Name}).Decode(&existing)
 
 	if err == mongo.ErrNoDocuments {
+		_, err := collection.InsertOne(ctx, profession)
+		if err != nil {
+			return err
+		}
+		log.Println("Successfully inserted profession!")
+		return nil
 	} else if err != nil {
 		return err
 	} else if profession.TimeStamp.After(existing.TimeStamp) {
 		_, updateErr := collection.ReplaceOne(ctx, bson.M{"name": profession.Name}, profession)
+		log.Println("Successfully updated profession")
 		return updateErr
 	}
+	log.Println("Profession not updated: older timestamp")
+	return nil
+}
 
-	_, err1 := collection.InsertOne(ctx, profession)
-	if err1 != nil {
-		return err
+func AddQuestionnaire(questionnaire Questionnaire) error {
+	collection := mongoClient.Database("smartify").Collection("dataset_career_test")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	if questionnaire.TimeStamp.IsZero() {
+		questionnaire.TimeStamp = time.Now()
 	}
-	log.Println("Successfully inserted profession!")
+
+	var existing Profession
+	err := collection.FindOne(ctx, bson.M{"userid": questionnaire.UserID}).Decode(&existing)
+
+	if err == mongo.ErrNoDocuments {
+		_, err1 := collection.InsertOne(ctx, questionnaire)
+		if err1 != nil {
+			return err1
+		}
+		log.Println("Successfully inserted questionnaire!")
+		return nil
+	} else if err != nil {
+		return err
+	} else if questionnaire.TimeStamp.After(existing.TimeStamp) {
+		_, updateErr := collection.ReplaceOne(ctx, bson.M{"userid": questionnaire.UserID}, questionnaire)
+		if updateErr != nil {
+			return updateErr
+		}
+		log.Println("Successfully updated questionnaire!")
+		return nil
+	}
+
+	log.Println("Questionnaire not updated: older timestamp")
 	return nil
 }
