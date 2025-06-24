@@ -78,7 +78,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          'Reset password',
+          'Сбросить пароль',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
@@ -120,7 +120,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           child: Column(
             children: [
               const Text(
-                "Add your email 1 / 3",
+                "Введите вашу почту 1 / 3",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -129,7 +129,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           ),
         ),
         const SizedBox(height: 40),
-        const Text("Email", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        const Text("Почта", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
         TextField(
           controller: emailController,
@@ -167,7 +167,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text("Send", style: TextStyle(color: Colors.white)),
+            child: const Text("Отправить", style: TextStyle(color: Colors.white)),
           ),
         ),
       ],
@@ -184,7 +184,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         const SizedBox(height: 16),
         const SizedBox(height: 10),
         const Text(
-          "Verify your email 2 / 3",
+          "Подтвердите вашу почту 2 / 3",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
@@ -201,7 +201,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         ),
         const SizedBox(height: 30),
         Text(
-          "We just sent 5-digit code to\n${emailController.text}, enter it below:",
+          "Мы отправили пятизначный код на\n${emailController.text}, введите его ниже:",
           style: const TextStyle(fontSize: 15),
           textAlign: TextAlign.center,
         ),
@@ -213,7 +213,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               crossAxisAlignment: CrossAxisAlignment.start, // aligns everything to the left
               children: [
                 const Text(
-                  "Code",
+                  "Код",
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8), // spacing between label and pin field
@@ -267,7 +267,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 );
               }
             },
-            child: const Text("Verify email", style: TextStyle(color: Colors.white)),
+            child: const Text("Подтвердить почту", style: TextStyle(color: Colors.white)),
           ),
         ),
         const SizedBox(height: 20),
@@ -282,10 +282,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           },
           child: const Text.rich(
             TextSpan(
-              text: "Wrong email? ",
+              text: "Указали не ту почту? ",
               children: [
                 TextSpan(
-                  text: "Send to different email",
+                  text: "Отправить на другой адрес",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
@@ -317,7 +317,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         child: Column(
           children: [
             const Text(
-              "Enter new password 3 / 3",
+              "Придумайте новый пароль 3 / 3",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -326,7 +326,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         ),
       ),
       const SizedBox(height: 30),
-      const Text("Password", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+      const Text("Пароль", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
       const SizedBox(height: 8),
       TextField(
         controller: passwordController,
@@ -352,9 +352,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         ),
       ),
       const SizedBox(height: 16),
-      _buildCriteria("8 characters minimum", hasMinLength),
-      _buildCriteria("a number", hasNumber),
-      _buildCriteria("a symbol", hasSymbol),
+      _buildCriteria("Минимум 8 символов", hasMinLength),
+      _buildCriteria("Хотя бы одна цифра (0-9)", hasNumber),
+      _buildCriteria("Хотя бы один специальный символ (например: ! @ # % ^ & * ( ) - _ + = )", hasSymbol),
       const Spacer(),
       SizedBox(
         width: double.infinity,
@@ -378,7 +378,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             disabledBackgroundColor: const Color(0xFFB2DFDB),
           ),
-          child: const Text("Continue"),
+          child: const Text("Продолжить"),
         ),
       ),
     ],
@@ -405,13 +405,13 @@ return Column(
             const Icon(Icons.check, size: 40, color: Color.fromRGBO(21, 203, 189, 1)),
             const SizedBox(height: 24),
             const Text(
-              "Your password was successfully updated!",
+              "Ваш пароль был успешно обновлён!",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             const Text(
-              "Only one click to explore education.",
+              "Исследуйте мир образования одним кликом.",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -431,7 +431,7 @@ return Column(
                 minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text("Log in", style: TextStyle(color: Colors.white)),
+              child: const Text("Войти", style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -454,11 +454,11 @@ return Column(
       padding: const EdgeInsets.only(bottom: 12),
       child: Text.rich(
         TextSpan(
-          text: 'By using Smartify, you agree to the\n',
+          text: 'Используя Smartify, вы соглашаетесь с\n',
           style: const TextStyle(fontSize: 12),
           children: [
             TextSpan(
-              text: 'Terms and Privacy Policy.',
+              text: 'Условиями пользования и Политикой конфиденциальности.',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],

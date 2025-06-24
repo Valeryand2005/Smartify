@@ -36,7 +36,7 @@ class WelcomePage extends StatelessWidget {
               Column(
                 children: [
                   const Text(
-                    'Welcome to',
+                    'Добро пожаловать в',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -54,7 +54,7 @@ class WelcomePage extends StatelessWidget {
               Column(
                 children: [
                   const Text(
-                    'Unlock Your Potential, Chart Your Course.',
+                    'Открой свой потенциал, отслеживай свой прогресс.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -83,7 +83,7 @@ class WelcomePage extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'Create an account',
+                        'Создать аккаунт',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -92,7 +92,7 @@ class WelcomePage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already have an account?'),
+                      const Text('Уже зарегистрированы?'),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
@@ -103,7 +103,7 @@ class WelcomePage extends StatelessWidget {
                           );
                         },
                         child: const Text(
-                          'Log in',
+                          'Войти',
                           style: TextStyle(
                             color: Colors.blueAccent,
                           ),
