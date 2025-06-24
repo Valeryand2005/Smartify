@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/menu/menu_page.dart';
+import 'package:smartify/pages/tracker/main_tracker_page.dart';
 import 'package:smartify/pages/universities/main_university_page.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
 
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const UniversityPage(),
+      home: const ProgressPage(),
     );
   }
 }
