@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/universities/main_university_page.dart';
+import 'package:smartify/pages/account/account_page.dart';
+import 'package:smartify/pages/tests/prof_test_page.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -17,23 +19,103 @@ class SmartifyApp extends StatelessWidget {
   }
 }
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    /*
+    if (index == 4) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsSheet()),
+      );
+    }
+    */
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-        automaticallyImplyLeading: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Center(
-          child: Image.asset(
-            'logo.png',
-            height: 50,
-          ),
+      appBar: AppBar(
+  backgroundColor: Colors.white,
+  elevation: 0,
+  automaticallyImplyLeading: false, // We'll manually control it
+  title: Stack(
+    alignment: Alignment.center,
+    children: [
+      Center(
+        child: Image.asset(
+          'logo.png',
+          height: 50,
         ),
       ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: GestureDetector(
+              onTap: () {
+                showGeneralDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  barrierLabel: 'Settings',
+                  transitionDuration: const Duration(milliseconds: 300),
+                  pageBuilder: (_, __, ___) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Container(
+                          width: 360,
+                          height: MediaQuery.of(context).size.height,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(16),
+                              bottomRight: Radius.circular(16),
+                            ),
+                          ),
+                          child: const SettingsSheet(),
+                        ),
+                      ),
+                    );
+                  },
+                  transitionBuilder: (context, animation, _, child) {
+                    final offsetAnimation = Tween<Offset>(
+                      begin: const Offset(-1.0, 0.0),
+                      end: Offset.zero,
+                    ).animate(animation);
+
+                    return SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    );
+                  },
+                );
+              },
+              child: const CircleAvatar(
+                radius: 18,
+                backgroundImage: AssetImage('assets/user_avatar.jpg'),
+              ),
+            ),
+          ),
+          const SizedBox(width: 50), // Spacer for symmetry (optional)
+        ],
+      ),
+    ],
+  ),
+),
 
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
@@ -44,7 +126,8 @@ class DashboardPage extends StatelessWidget {
         unselectedItemColor: Colors.grey,
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: 0,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),
@@ -68,83 +151,91 @@ class DashboardPage extends StatelessWidget {
           ),
         ],
       ),
-body: SafeArea(
-  child: LayoutBuilder(
-    builder: (context, constraints) {
-      return SingleChildScrollView(
-        physics: const ClampingScrollPhysics(), // отключает "подпрыгивание"
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Добро пожаловать!',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Добро пожаловать!',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Выберите тему',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _TopicCard(
+                              title: 'Университеты',
+                              subtitle: 'Более ста разных университетов',
+                              assetImage: 'university.png',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const UniversityPage(),
+                                  ),
+                                );
+                              },
+                              isDarkButton: false,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _TopicCard(
+                              title: 'Карьерные\nПредложения',
+                              subtitle: 'Выбери то, что подходит тебе',
+                              assetImage: 'career.png',
+                              onPressed: () {
+                                  Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const QuestionnairePage(),
+                                  ),
+                                );
+                              },
+                              isDarkButton: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _WideButton(
+                        title: 'Подготовка к ЕГЭ',
+                        subtitle: 'Более ста заданий · 10–60 мин.',
+                        onPressed: () {},
+                      ),
+                      const SizedBox(height: 12),
+                      _WideButton(
+                        title: 'Репетиторы',
+                        subtitle: 'Более ста репетиторов',
+                        onPressed: () {},
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Выберите тему',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _TopicCard(
-                        title: 'Университеты',
-                        subtitle: 'Более ста разных университетов',
-                        assetImage: 'university.png',
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const UniversityPage(),
-                            ),
-                          );
-                        },
-                        isDarkButton: false,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _TopicCard(
-                        title: 'Карьерные\nПредложения',
-                        subtitle: 'Выбери то, что подходит тебе',
-                        assetImage: 'career.png',
-                        onPressed: () {},
-                        isDarkButton: true,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _WideButton(
-                  title: 'Подготовка к ЕГЭ',
-                  subtitle: 'Более ста заданий · 10–60 мин.',
-                  onPressed: () {},
-                ),
-                const SizedBox(height: 12),
-                _WideButton(
-                  title: 'Репетиторы',
-                  subtitle: 'Более ста репетиторов',
-                  onPressed: () {},
-                ),
-                const SizedBox(height: 20), // чтобы не было прилипания к нижнему nav
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
-      );
-    },
-  ),
-),
-
+      ),
     );
   }
 }

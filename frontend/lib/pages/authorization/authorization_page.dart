@@ -47,7 +47,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         title: const Text(
-          'Log into account',
+          'Войти в аккаунт',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -61,7 +61,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Email',
+              'Почта',
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 6),
@@ -77,7 +77,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Password',
+              'Пароль',
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 6),
@@ -85,7 +85,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
               controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
-                hintText: 'Enter password',
+                hintText: 'Введите пароль',
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword
@@ -117,7 +117,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                   ),
                 ),
                 child: const Text(
-                  'Log in',
+                  'Войти',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -134,7 +134,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                   );
                 },
                 child: const Text(
-                  'Forgot password?',
+                  'Забыли пароль?',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
@@ -145,11 +145,11 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text.rich(
                   TextSpan(
-                    text: 'By using Smartify, you agree to the\n',
+                    text: 'Используя Smartify, вы соглашаетесь с\n',
                     style: const TextStyle(fontSize: 12),
                     children: [
                       TextSpan(
-                        text: 'Terms and Privacy Policy.',
+                        text: 'Условиями пользования и Политикой конфиденциальности.',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
