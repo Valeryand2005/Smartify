@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/universities/main_university_page.dart';
 import 'package:smartify/pages/account/account_page.dart';
-import 'package:smartify/pages/tests/prof_test_page.dart';
+import 'package:smartify/pages/professions/professions_page.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -27,25 +27,10 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    /*
-    if (index == 4) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SettingsSheet()),
-      );
-    }
-    */
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
   backgroundColor: Colors.white,
   elevation: 0,
@@ -117,40 +102,6 @@ class _DashboardPageState extends State<DashboardPage> {
   ),
 ),
 
-      resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.white,
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF54D0C0),
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_rounded),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book_rounded),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '',
-          ),
-        ],
-      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -206,7 +157,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        const QuestionnairePage(),
+                                        const ProfessionsPage(),
                                   ),
                                 );
                               },
