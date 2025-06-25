@@ -172,7 +172,11 @@ class _ProgressPageState extends State<ProgressPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const Icon(Icons.arrow_back, color: Colors.black),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black,), 
+          onPressed: () {
+            Navigator.pop(context);
+          },),
         title: const Text('Прогресс', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         actions: [

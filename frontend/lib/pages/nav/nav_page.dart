@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smartify/pages/tracker/main_tracker_page.dart';
 import 'package:smartify/pages/universities/main_university_page.dart';
 import 'package:smartify/pages/account/account_page.dart';
 import 'package:smartify/pages/professions/professions_page.dart';
@@ -170,7 +171,15 @@ class _DashboardPageState extends State<DashboardPage> {
                       _WideButton(
                         title: 'Подготовка к ЕГЭ',
                         subtitle: 'Более ста заданий · 10–60 мин.',
-                        onPressed: () {},
+                        onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProgressPage(),
+                                  ),
+                                );
+                              },
                       ),
                       const SizedBox(height: 12),
                       _WideButton(

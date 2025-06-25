@@ -58,7 +58,7 @@ class AuthService {
     return token != null && token.isNotEmpty;
   }
 
-  static Future<Map<String, String>> _fetchNewAccessToken(String refreshToken) async {
+  static Future<String> _fetchNewAccessToken(String refreshToken) async {
     // Реальный код будет делать HTTP-запрос к вашему API.
     // Это заглушка для примера:
     
