@@ -96,7 +96,11 @@ class _UniversityPageState extends State<UniversityPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Icon(Icons.menu, color: Colors.black),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black,), 
+          onPressed: () {
+            Navigator.pop(context);
+          },),
         centerTitle: true,
         title: const Text('Университеты', style: TextStyle(color: Colors.black)),
         actions: [

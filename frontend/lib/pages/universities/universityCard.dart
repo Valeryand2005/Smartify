@@ -41,7 +41,7 @@ class UniversityCard extends StatelessWidget {
             ),
             Container(
               width: double.infinity,
-              color: Colors.black54,
+              color: const Color.fromARGB(255, 59, 174, 128).withOpacity(0.5),
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
