@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _baseUrl = 'http://localhost:8080/api';
+  static const String _baseUrl = 'http://localhost:22025/api';
 
   // Метод для входа
   static Future<bool> login(String email, String password) async {
@@ -96,6 +96,91 @@ class ApiService {
     } catch (e) {
       print("Ошибка соединенея: $e");
       return false;
+    }
+  }
+
+  // Запрос на восстановление пароля
+  static Future<bool> forgot_password(String email) async {
+    try {
+      final response = await http.post(
+      Uri.parse('$_baseUrl/forgot_password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email}),
+    );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return true;
+      } else {
+        final data = jsonDecode(response.body);
+        return false;
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return false;
+    }
+  }
+  static Future<bool> resetPassword_codeValidation(String email, String code)async {
+    try {
+      final response = await http.post(
+      Uri.parse('$_baseUrl/commit_code_reset_password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'email': email,
+        'code': code
+      }));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return true;
+      } else {
+        final data = jsonDecode(response.body);
+        return false;
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return false;
+    }
+  }
+  static Future<bool> resetPassword_resetPassword(String email, String password)async {
+    try {
+      final response = await http.post(
+      Uri.parse('$_baseUrl/reset_password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'email': email,
+        'newPassword': password
+      }));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return true;
+      } else {
+        final data = jsonDecode(response.body);
+        return false;
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return false;
+    }
+  }
+  static Future<Map<String, String>> fetchNewAccessToken(String refreshToken) async {
+    try {
+      final response = await http.post(
+      Uri.parse('$_baseUrl/refresh_token'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'refresh_token': refreshToken
+      }));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return {};
     }
   }
 }

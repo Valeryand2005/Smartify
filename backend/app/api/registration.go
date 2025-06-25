@@ -8,9 +8,9 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"net/smtp"
 	"time"
 
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api_email"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
 )
 
@@ -34,7 +34,10 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&email)
 	if err != nil {
 		log.Println("Cannot decode request")
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid request",
+		})
 		return
 	}
 
@@ -44,20 +47,20 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	// Check if the mail is valid
 	if !database.IsValidEmail(email.Email) {
 		log.Printf("Not valid Email")
-		http.Error(w, "Not valid Email", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Not valid Email",
+		})
 		return
 	}
 
 	// Check if the mail was used
-	if _, exists := temporary_users[email.Email]; exists {
-		log.Printf("User already exists")
-		http.Error(w, "User already exists", http.StatusConflict)
-		return
-	}
-
 	if err := database.CheckUser(email.Email, db); err != nil {
 		log.Printf("User already exists")
-		http.Error(w, "User already exists", http.StatusConflict)
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "User already exists",
+		})
 		return
 	}
 
@@ -65,55 +68,29 @@ func RegistrationHandler_EmailValidation(w http.ResponseWriter, r *http.Request)
 	number, err := Generate5DigitCode()
 	if err != nil {
 		log.Printf("Cannot generate code: %s", err)
-		http.Error(w, "Cannot generate code", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Cannot generate code",
+		})
 		return
 	}
 
 	// Add user in map
 	temporary_users[email.Email] = number
 
-	// Send number to email
-	err = sendEmail(email.Email, "Email Validation", number)
-	if err != nil {
-		log.Printf("Cannot send message: %s", err)
-		http.Error(w, "Cannot send verification email", http.StatusInternalServerError)
-		return
+	// Send number to email (3 attempts)
+	api_email.EmailQueue <- api_email.EmailTask{
+		To:      email.Email,
+		Subject: "Email Validation",
+		Body:    number,
+		Retries: 3,
 	}
 
 	// Send successful answer
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Verification code sent",
-		"code":    http.StatusOK,
+		"code": http.StatusOK,
 	})
-}
-
-func sendEmail(to, subject, body string) error {
-	// Настройки SMTP-сервера
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
-	smtpUsername := "projectsmartifyapp@gmail.com"
-	smtpPassword := "iegn yhso uqye ikrm"
-
-	// Формируем письмо
-	msg := []byte(
-		"To: " + to + "\r\n" +
-			"Subject: " + subject + "\r\n" +
-			"\r\n" +
-			body + "\r\n",
-	)
-
-	// Аутентификация и отправка
-	auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpHost)
-	err := smtp.SendMail(
-		smtpHost+":"+smtpPort,
-		auth,
-		smtpUsername,
-		[]string{to},
-		msg,
-	)
-
-	return err
 }
 
 // Для второго этапа регистрации (Подтверждение кода)
@@ -131,30 +108,37 @@ func RegistrationHandler_CodeValidation(w http.ResponseWriter, r *http.Request) 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Println("Cannot decode request")
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid JSON",
+		})
 		return
 	}
 
 	// Проверяем сущетсвоание пользователя
 	if _, exists := temporary_users[user.Email]; !exists {
 		log.Printf("User does not exists")
-		http.Error(w, "User does not exists...", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "User does not exists...",
+		})
 		return
 	}
 
 	// Проверяем код
 	if user.Code != temporary_users[user.Email] {
 		log.Printf("Code does not equal")
-		http.Error(w, "Code does not equal...", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Code does not equal...",
+		})
 		return
 	}
 
 	// Отправляем успешный ответ
-	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Code Verified",
-		"code":    http.StatusOK,
+		"code": http.StatusOK,
 	})
 }
 
@@ -173,14 +157,20 @@ func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user_request)
 	if err != nil {
 		log.Println("Cannot decode request")
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid JSON",
+		})
 		return
 	}
 
 	// Проверяем сущетсвоание пользователя
 	if _, exists := temporary_users[user_request.Email]; !exists {
 		log.Printf("User does not exists")
-		http.Error(w, "User does not exists...", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "User does not exists...",
+		})
 		return
 	}
 
@@ -193,14 +183,16 @@ func RegistrationHandler_Password(w http.ResponseWriter, r *http.Request) {
 	err = database.Add_new_user(user, db)
 	if err != nil {
 		log.Printf("Error with database")
-		http.Error(w, "Cannot create user... error with database", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Cannot create user... error with database",
+		})
 		return
 	}
 	delete(temporary_users, user_request.Email)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "Password was created",
-		"code":    http.StatusOK,
+		"code": http.StatusOK,
 	})
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/authorization/authorization_page.dart';
 import 'package:smartify/pages/sign/sign_up_page.dart';
+import 'package:smartify/pages/nav/nav_page.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -35,7 +36,7 @@ class WelcomePage extends StatelessWidget {
               Column(
                 children: [
                   const Text(
-                    'Welcome to',
+                    'Добро пожаловать в',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -53,7 +54,7 @@ class WelcomePage extends StatelessWidget {
               Column(
                 children: [
                   const Text(
-                    'Unlock Your Potential, Chart Your Course.',
+                    'Открой свой потенциал, отслеживай свой прогресс.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -69,6 +70,7 @@ class WelcomePage extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const SignUpPage(),
+                            //builder: (context) => const DashboardPage(),
                           ),
                         );
                       },
@@ -81,7 +83,7 @@ class WelcomePage extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'Create an account',
+                        'Создать аккаунт',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -90,7 +92,7 @@ class WelcomePage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already have an account?'),
+                      const Text('Уже зарегистрированы?'),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
@@ -101,7 +103,7 @@ class WelcomePage extends StatelessWidget {
                           );
                         },
                         child: const Text(
-                          'Log in',
+                          'Войти',
                           style: TextStyle(
                             color: Colors.blueAccent,
                           ),
