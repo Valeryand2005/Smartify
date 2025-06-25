@@ -183,4 +183,27 @@ class ApiService {
       return {};
     }
   }
+  // Метод для входа
+  static Future<bool> AddQuestionnaire(Map<String, dynamic> questionnaire) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/questionnaire'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(questionnaire),
+      );
+
+      if (response.statusCode == 200) {
+        print("Анкета успешно отправлена");
+        return true;
+      } else {
+        print("Ошибка при отправке анкеты: ${response.statusCode}");
+        print("Ответ сервера: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Ошибка соединенея: $e");
+      return false;
+    }
+  }
 }
+
