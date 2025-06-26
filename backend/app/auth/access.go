@@ -1,18 +1,16 @@
-package api
+package auth
 
 import (
 	"context"
 	"net/http"
 	"strings"
-
-	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/auth"
 )
 
 type contextKey string
 
 const UserIDKey contextKey = "userID"
 
-func access(next http.Handler) http.Handler {
+func Access(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
@@ -22,7 +20,7 @@ func access(next http.Handler) http.Handler {
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 
-		claims, err := auth.ParseToken(tokenStr)
+		claims, err := ParseToken(tokenStr)
 		if claims.Type != "access" {
 			http.Error(w, "Invalid token type", http.StatusUnauthorized)
 			return

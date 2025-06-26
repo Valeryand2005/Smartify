@@ -68,3 +68,12 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 
 	return
 }
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+	json.NewDecoder(r.Body).Decode(&req)
+	database.DeleteRefreshToken(req.RefreshToken, db)
+	w.WriteHeader(http.StatusOK)
+}

@@ -28,9 +28,12 @@ func main() {
 
 	// Обновление токена
 	http.HandleFunc("/api/refresh_token", api.RefreshHandler)
+	//http.Handle("/api/refresh_token", auth.Access(http.HandlerFunc(api.RefreshHandler)))
 
 	// Добавление анкеты
 	http.HandleFunc("/api/questionnaire", api.AddQuestionnaireHandler)
+	//http.Handle("/api/questionnaire", auth.Access(http.HandlerFunc(api.AddQuestionnaireHandler)))
+
 	// Для подтверждения по ссылке
 	/* -----------------------------------------------------------------------
 		http.Handle("/reset_password_page/",
