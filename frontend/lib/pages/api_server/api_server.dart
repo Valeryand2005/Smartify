@@ -189,9 +189,14 @@ class ApiService {
   // Метод для входа
   static Future<bool> AddQuestionnaire(Map<String, dynamic> questionnaire) async {
     try {
+      final token = await AuthService.getAccessToken();
+
       final response = await http.post(
         Uri.parse('$_baseUrl/questionnaire'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Access_token': token ?? '',
+        },
         body: json.encode(questionnaire),
       );
 

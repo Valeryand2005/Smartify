@@ -68,7 +68,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
 
   Future<void> _submitQuestionnaire() async {
     final Map<String, dynamic> data = {
-    "user_id": "user",
+    "user_id": 0,
     "class": "",
     "region": "",
     "avg_grade": "",
