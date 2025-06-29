@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
+import 'package:smartify/pages/api_server/api_token.dart';
 
 class SettingsSheet extends StatelessWidget {
   const SettingsSheet({super.key});
@@ -71,6 +72,7 @@ class SettingsSheet extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
+                          AuthService.deleteTokens();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
