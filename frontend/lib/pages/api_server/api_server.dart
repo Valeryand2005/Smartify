@@ -168,6 +168,7 @@ class ApiService {
     }
   }
   static Future<Map<String, String>> fetchNewAccessToken(String refreshToken) async {
+    print("Токен $refreshToken");
     try {
       final response = await http.post(
       Uri.parse('$_baseUrl/refresh_token'),
@@ -203,6 +204,15 @@ class ApiService {
       if (response.statusCode == 200) {
         print("Анкета успешно отправлена");
         return true;
+      } else if (response.statusCode == 401) {
+        print("Access token is invalid or expired. Trying to refresh...");
+
+        bool refreshSuccess = await AuthService.refreshTokens();
+        if (!refreshSuccess) {
+          print("Не удалось обновить токены");
+          return false;
+        }
+        return await AddQuestionnaire(questionnaire);
       } else {
         print("Ошибка при отправке анкеты: ${response.statusCode}");
         print("Ответ сервера: ${response.body}");

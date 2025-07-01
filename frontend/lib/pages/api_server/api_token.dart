@@ -53,6 +53,27 @@ class AuthService {
     }
   }
 
+  static Future<bool> refreshTokens() async {
+    final refreshToken = await getRefreshToken();
+    if (refreshToken == null) return false;
+
+    try {
+      final newTokens = await ApiService.fetchNewAccessToken(refreshToken);
+      if ( !newTokens.containsKey('access_token') || !newTokens.containsKey('refresh_token') ) {
+        print('Invalid tokens received');
+        return false;
+      }
+
+      String access_token = newTokens['access_token'] as String;
+      String refresh_token = newTokens['refresh_token'] as String;
+      await saveTokens(accessToken: access_token, refreshToken: refresh_token);
+      return true;
+    } catch (e) {
+      print('Ошибка обновления токена: $e');
+      return false;
+    }
+  }
+
   static Future<bool> isAuthenticated() async {
     final token = await getAccessToken();
     return token != null && token.isNotEmpty;
