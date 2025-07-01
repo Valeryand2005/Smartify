@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:smartify/pages/api_server/api_token.dart';
 import 'package:http/http.dart' as http;
+import 'package:smartify/pages/api_server/api_save_data.dart';
 
 class ApiService {
   static const String _baseUrl = 'http://localhost:22025/api';
@@ -20,6 +21,7 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         AuthService.saveTokens(accessToken: data["access_token"], refreshToken: data["refresh_token"]);
+        ManageData.saveData('email', email);
         return true;
       } else {
         final data = jsonDecode(response.body);
@@ -91,6 +93,7 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         AuthService.saveTokens(accessToken: data["access_token"], refreshToken: data["refresh_token"]);
+        ManageData.saveData('email', email);
         return true;
       } else {
         final data = jsonDecode(response.body);
@@ -135,6 +138,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
         return true;
       } else {
         final data = jsonDecode(response.body);

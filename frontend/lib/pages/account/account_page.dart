@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
 import 'package:smartify/pages/api_server/api_token.dart';
+import 'package:smartify/pages/api_server/api_save_data.dart';
 
 class SettingsSheet extends StatelessWidget {
   const SettingsSheet({super.key});
@@ -43,7 +44,7 @@ class SettingsSheet extends StatelessWidget {
                 radius: 24,
                 backgroundImage: AssetImage('assets/user_avatar.jpg'),
               ),
-              title: const Text('kanekakuk@gmail.com'),
+              title: Text(ManageData.getData('email') ?? "example@example.com"),
               trailing: const Icon(Icons.edit, color: Color(0xFF54D0C0)),
               onTap: () {},
             ),
