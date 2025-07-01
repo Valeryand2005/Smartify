@@ -46,7 +46,7 @@ func GenerateTokens(userID int) (accessToken string, refreshToken string, err er
 	}
 
 	refreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString(jwtKey)
-	return
+	return accessToken, refreshToken, nil
 }
 
 func ParseToken(tokenStr string) (*Claims, error) {
