@@ -21,7 +21,7 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         AuthService.saveTokens(accessToken: data["access_token"], refreshToken: data["refresh_token"]);
-        ManageData.saveData('email', email);
+        await ManageData.saveDataAsync('email', email);
         return true;
       } else {
         final data = jsonDecode(response.body);
@@ -93,7 +93,7 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         AuthService.saveTokens(accessToken: data["access_token"], refreshToken: data["refresh_token"]);
-        ManageData.saveData('email', email);
+        await ManageData.saveDataAsync('email', email);
         return true;
       } else {
         final data = jsonDecode(response.body);
