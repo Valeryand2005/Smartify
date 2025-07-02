@@ -9,7 +9,7 @@ import (
 
 var (
 	jwtKey          = []byte(os.Getenv("JWT_SECRET"))
-	accessTokenTTL  = time.Minute * 15
+	accessTokenTTL  = time.Minute * 1
 	refreshTokenTTL = time.Hour * 24 * 7
 )
 

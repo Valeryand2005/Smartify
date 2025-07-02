@@ -64,11 +64,12 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 
 	database.StoreRefreshToken(userID, newRefreshToken, db)
 
+	resp := map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": newRefreshToken,
+	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(TokenResponse{
-		AccessToken:  accessToken,
-		RefreshToken: newRefreshToken,
-	})
+	json.NewEncoder(w).Encode(resp)
 
 	return
 }

@@ -173,7 +173,6 @@ class ApiService {
     }
   }
   static Future<Map<String, String>> fetchNewAccessToken(String refreshToken) async {
-    print("Токен $refreshToken");
     try {
       final response = await http.post(
       Uri.parse('$_baseUrl/refresh_token'),
@@ -183,7 +182,10 @@ class ApiService {
       }));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data;
+        return {
+          'access_token': data["access_token"],
+          'refresh_token': data["refresh_token"],
+        };
       } else {
         return {};
       }
