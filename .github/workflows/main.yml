@@ -1,0 +1,53 @@
+name: Docker Compose CI/CD
+
+#Hi
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: [self-hosted]
+
+    env:
+      REMOTE_HOST: 213.226.112.206
+      REMOTE_USER: ghrunner
+      APP_DIR: /pro/smartify
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH client
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
+
+      - name: Copy application files to remote server
+        run: |
+          ssh $REMOTE_USER@$REMOTE_HOST "mkdir -p ${APP_DIR}"
+
+          scp -r docker-compose.yml $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+          scp -r backend/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+          scp -r database/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+          scp -r ml/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+          scp -r frontend/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+
+      - name: Build and deploy Docker containers on remote server
+        run: |
+          ssh $REMOTE_USER@$REMOTE_HOST "
+            cd ${APP_DIR} &&
+            docker-compose build &&
+            docker-compose up -d
+          "
+          echo "Deployment completed on $REMOTE_HOST"
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/id_rsa

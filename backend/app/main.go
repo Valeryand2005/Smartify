@@ -9,6 +9,7 @@ import (
 
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/api_email"
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/auth"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
 )
 
@@ -30,7 +31,9 @@ func main() {
 	http.HandleFunc("/api/refresh_token", api.RefreshHandler)
 
 	// Добавление анкеты
-	http.HandleFunc("/api/questionnaire", api.AddQuestionnaireHandler)
+	//http.HandleFunc("/api/questionnaire", api.AddQuestionnaireHandler)
+	http.Handle("/api/questionnaire", auth.Access(http.HandlerFunc(api.AddQuestionnaireHandler)))
+
 	// Для подтверждения по ссылке
 	/* -----------------------------------------------------------------------
 		http.Handle("/reset_password_page/",
