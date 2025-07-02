@@ -4,10 +4,10 @@ name: Docker Compose CI/CD
 on:
   push:
     branches:
-      - Back
+      - main
   pull_request:
     branches:
-      - Back
+      - main
 
 jobs:
   build_and_deploy:
