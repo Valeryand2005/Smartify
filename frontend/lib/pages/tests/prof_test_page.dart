@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
+import 'package:smartify/pages/api_server/api_server.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -64,6 +65,101 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
   List<Question> questions = [];
   final Map<int, dynamic> answers = {};
   final highlightColor = const Color(0xFF54D0C0);
+
+  Future<void> _submitQuestionnaire() async {
+    final Map<String, dynamic> data = {
+    "user_id": "admin",
+    "class": "",
+    "region": "",
+    "avg_grade": "",
+    "favorite_subjects": [],
+    "hard_subjects": [],
+    "subject_scores": {},
+    "interests": [],
+    "values": [],
+    "mbti_scores": {},
+    "work_preferences": {
+      "role": "",
+      "place": "",
+      "style": "",
+      "exclude": "",
+    },
+  };
+    for (final entry in answers.entries) {
+      final index = entry.key;
+      final value = entry.value;
+
+      print("✔ ${index} = $value");
+
+      switch (index) {
+        case 0:
+          data["class"] = value;
+          break;
+        case 1:
+          data["region"] = value;
+          break;
+        case 2:
+          data["avg_grade"] = value;
+          break;
+        case 3:
+          data["favorite_subjects"] = value; // List<String>
+          break;
+        case 4:
+          data["hard_subjects"] = value;
+          break;
+        case 5:
+          data["subject_scores"]["Математика"] = value;
+          break;
+        case 6:
+          data["subject_scores"]["Русский язык"] = value;
+          break;
+        case 7:
+          data["subject_scores"]["Химия"] = value;
+          break;
+        case 8:
+          data["subject_scores"]["Биология"] = value;
+          break;
+        case 9:
+          data["subject_scores"]["Физика"] = value;
+          break;
+        case 10:
+          data["subject_scores"]["Информатика"] = value;
+          break;
+        case 11:
+          data["subject_scores"]["История"] = value;
+          break;
+        case 13:
+          data["interests"] = value;
+          break;
+        case 14:
+          data["values"] = value;
+          break;
+        case >= 16 && <= 40:
+          final mbtiKey = "q${index - 5}";  // Например, q11…q35
+          data["mbti_scores"][mbtiKey] = int.tryParse(value.toString()) ?? 0;
+          break;
+        case 41:
+          data["work_preferences"]["role"] = value;
+          break;
+        case 42:
+          data["work_preferences"]["place"] = value;
+          break;
+        case 43:
+          data["work_preferences"]["style"] = value;
+          break;
+        case 44:
+          data["work_preferences"]["exclude"] = value;
+          break;
+      }
+    }
+    final success = await ApiService.AddQuestionnaire(data);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success ? "Анкета отправлена!" : "Ошибка при отправке анкеты"),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -378,6 +474,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                         backgroundColor: highlightColor,
                       ),
                       onPressed: () {
+                        _submitQuestionnaire();
                         for (final entry in answers.entries) {
                           final q = questions[entry.key];
                           final answer = entry.value is List

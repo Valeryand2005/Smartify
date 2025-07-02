@@ -59,7 +59,6 @@ class AuthService {
   }
 
   static Future<String> _fetchNewAccessToken(String refreshToken) async {
-    // Реальный код будет делать HTTP-запрос к вашему API.
     // Это заглушка для примера:
     
     await Future.delayed(const Duration(seconds: 1));
