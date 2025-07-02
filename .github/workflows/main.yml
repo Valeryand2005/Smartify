@@ -41,7 +41,7 @@ jobs:
       - name: Build and deploy Docker containers on remote server
         run: |
           ssh $REMOTE_USER@$REMOTE_HOST "
-            cd /opt/smartify &&
+            cd ${APP_DIR} &&
             docker compose down --remove-orphans || true &&
             docker compose pull || true
             docker compose build &&
