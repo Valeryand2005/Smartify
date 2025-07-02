@@ -1,4 +1,4 @@
-name: Docker Compose CI/CD (Separate Deployment) # Обновленное название workflow
+name: Docker Compose CI/CD
 
 on:
   push:
@@ -30,13 +30,13 @@ jobs:
 
       - name: Copy application files to remote server
         run: |
-          ssh $REMOTE_USER@$REMOTE_HOST "mkdir -p /opt/smartify"
+          ssh $REMOTE_USER@$REMOTE_HOST "mkdir -p ${APP_DIR}"
 
-          scp -r docker-compose.yml $REMOTE_USER@$REMOTE_HOST:/opt/smartify/
-          scp -r backend/ $REMOTE_USER@$REMOTE_HOST:/opt/smartify/
-          scp -r database/ $REMOTE_USER@$REMOTE_HOST:/opt/smartify/
-          scp -r ml/ $REMOTE_USER@$REMOTE_HOST:/opt/smartify/ # Если планируете использовать ML
-          scp -r frontend/ $REMOTE_USER@$REMOTE_HOST:/opt/smartify/ # Если планируете использовать Frontend
+          scp -r docker-compose.yml $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+          scp -r backend/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+          scp -r database/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+          scp -r ml/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
+          scp -r frontend/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
 
       - name: Build and deploy Docker containers on remote server
         run: |
