@@ -65,6 +65,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
   List<Question> questions = [];
   final Map<int, dynamic> answers = {};
   final highlightColor = const Color(0xFF54D0C0);
+  final Map<int, TextEditingController> _textControllers = {};
 
   Future<void> _submitQuestionnaire() async {
     final Map<String, dynamic> data = {
@@ -159,6 +160,13 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         content: Text(success ? "Анкета отправлена!" : "Ошибка при отправке анкеты"),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Очищаем контроллеры при уничтожении виджета
+    _textControllers.values.forEach((controller) => controller.dispose());
+    super.dispose();
   }
 
   @override
@@ -292,77 +300,93 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
   Widget buildQuestion(int index, Question question) {
     Widget content;
 
-    switch (question.type) {
-      case QuestionType.singleChoice:
-        String? selected = answers[index];
+switch (question.type) {
+  case QuestionType.singleChoice:
+    String? selected = answers[index];
 
-        final otherOption = question.options!.firstWhere(
-          (o) => o.toLowerCase().contains('другое'),
-          orElse: () => '',
-        );
+    final otherOption = question.options!.firstWhere(
+      (o) => o.toLowerCase().contains('другое'),
+      orElse: () => '',
+    );
 
-        final controller = TextEditingController(
-          text: selected != null &&
-                  !question.options!.contains(selected) &&
-                  otherOption.isNotEmpty
-              ? selected
-              : '',
-        );
+    // Инициализируем контроллер один раз
+    if (!_textControllers.containsKey(index)) {
+      _textControllers[index] = TextEditingController();
+    }
 
-        content = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(question.text, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-            ...question.options!.where((o) => o != otherOption).map(
+    // Восстанавливаем значение, если оно кастомное
+    if (selected != null &&
+        !question.options!.contains(selected) &&
+        otherOption.isNotEmpty) {
+      _textControllers[index]!.text = selected;
+    }
+
+    content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          question.text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        ...question.options!
+            .where((o) => o != otherOption)
+            .map(
               (option) => RadioListTile<String>(
                 activeColor: highlightColor,
-                title: Text(option, style: const TextStyle(color: Colors.black)),
+                title:
+                    Text(option, style: const TextStyle(color: Colors.black)),
                 value: option,
-                groupValue: question.options!.contains(selected) ? selected : '',
-                onChanged: (value) => setState(() => answers[index] = value),
+                groupValue:
+                    question.options!.contains(selected) ? selected : '',
+                onChanged: (value) =>
+                    setState(() => answers[index] = value),
               ),
             ),
-            if (otherOption.isNotEmpty)
-              RadioListTile<String>(
-                activeColor: highlightColor,
-                value: '__other__',
-                groupValue: !question.options!.contains(selected) && selected != null ? '__other__' : '',
-                onChanged: (_) {
-                  setState(() {
-                    answers[index] = controller.text;
-                  });
-                },
-                title: Row(
-                  children: [
-                    const Text('Другое:', style: TextStyle(color: Colors.black)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: controller,
-                        decoration: const InputDecoration(
-                          hintText: 'Ваш вариант',
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            answers[index] = value;
-                          });
-                        },
-                        onTap: () {
-                          setState(() {
-                            answers[index] = controller.text;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+        if (otherOption.isNotEmpty)
+          RadioListTile<String>(
+            activeColor: highlightColor,
+            value: '__other__',
+            groupValue: (!question.options!.contains(selected) &&
+                    selected != null)
+                ? '__other__'
+                : '',
+            onChanged: (_) {
+              setState(() {
+                answers[index] = _textControllers[index]!.text;
+              });
+            },
+            title: Row(
+              children: [
+                const Text(
+                  'Другое:',
+                  style: TextStyle(color: Colors.black),
                 ),
-              ),
-          ],
-        );
-        break;
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _textControllers[index],
+                    decoration: const InputDecoration(
+                      hintText: 'Ваш вариант',
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      answers[index] = value;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+    break;
+
 
       case QuestionType.multiChoice:
         final selected = (answers[index] as List?)?.map((e) => e.toString()).toList() ?? <String>[];
