@@ -16,9 +16,6 @@ void main() async {
   
   // Проверка аутентификации
   final isAuthenticated = await AuthService.isAuthenticated();
-  if (isAuthenticated) {
-    ManageData.loadData();
-  }
   runApp(MyApp(widget: isAuthenticated ? const DashboardPage() : const WelcomePage()));
 }
 class MyApp extends StatelessWidget {

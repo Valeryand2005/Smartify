@@ -44,7 +44,16 @@ class SettingsSheet extends StatelessWidget {
                 radius: 24,
                 backgroundImage: AssetImage('assets/user_avatar.jpg'),
               ),
-              title: Text(ManageData.getData('email') ?? "example@example.com"),
+              title:
+              FutureBuilder(
+                future: ManageData.getDataAsync('email'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
+                  return Text(snapshot.data ?? "example@example.com");
+                },
+              ),
               trailing: const Icon(Icons.edit, color: Color(0xFF54D0C0)),
               onTap: () {},
             ),
@@ -73,7 +82,7 @@ class SettingsSheet extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          AuthService.deleteTokens();
+                          _logOutFromAccount();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -128,5 +137,15 @@ class SettingsSheet extends StatelessWidget {
         onTap: () {},
       ),
     );
+  }
+
+  Future<bool> _logOutFromAccount() async {
+    try {
+      await AuthService.deleteTokens();
+      await ManageData.removeAllData();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
