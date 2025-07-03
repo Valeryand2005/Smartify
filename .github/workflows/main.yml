@@ -14,8 +14,8 @@ jobs:
     runs-on: [self-hosted]
 
     env:
-      URI: http://127.0.0.1:22025/api
-
+      URI: http://localhost:22025/api
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,6 +27,7 @@ jobs:
         run: |
           docker-compose build &&
           docker-compose up -d
+          docker-compose logs backend
 
       - name: Wait for services to be healthy
         run: |
