@@ -5,7 +5,7 @@ set -e
 
 echo "Running registration test..."
 
-RESPONSE=$(curl -s -X POST http://localhost:22026/api/registration_emailvalidation \
+RESPONSE=$(curl -s -X POST http://localhost:8080/api/registration_emailvalidation \
      -H "Content-Type: application/json" \
      -d '{"email":"test@mail.com"}')
 
@@ -44,7 +44,7 @@ if [ -z "$MAILHOG_CODE" ]; then
 fi
 
 
-RESPONSE=$(curl -s -X POST http://localhost:22026/api/registration_codevalidation \
+RESPONSE=$(curl -s -X POST http://localhost:8080/api/registration_codevalidation \
      -H "Content-Type: application/json" \
      -d '{"email":"test@mail.com","code":"'"$MAIL_CODE"'"}')
 
@@ -59,7 +59,7 @@ fi
 
 echo "✅ Email codevalidation request succeeded"
 
-RESPONSE=$(curl -s -X POST http://localhost:22026/api/registration_password \
+RESPONSE=$(curl -s -X POST http://localhost:8080/api/registration_password \
      -H "Content-Type: application/json" \
      -d '{"email":"test@mail.com","password":"Loh1725!"}')
 

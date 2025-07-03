@@ -14,7 +14,7 @@ jobs:
     runs-on: [self-hosted]
 
     env:
-      URI: http://localhost:22026/api
+      URI: http://localhost:8080/api
       
     steps:
       - name: Checkout code

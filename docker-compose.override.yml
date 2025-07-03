@@ -50,7 +50,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile 
     ports:
-      - "22026:8080"
+      - "8080:8080"
     depends_on:
       - db
       - mongo
