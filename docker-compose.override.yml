@@ -7,7 +7,7 @@ services:
       - "1025:1025"
       - "8025:8025"
     networks:
-      - smartify_test_internal
+      - internal
       - external
   db:
     image: postgres:15
@@ -22,7 +22,7 @@ services:
       - POSTGRES_DB=smartify
     restart: always
     networks:
-      - smartify_test_internal
+      - internal
       - external
 
   mongo:
@@ -38,7 +38,7 @@ services:
       - MONGO_INITDB_DATABASE=smartify
     restart: always
     networks:
-      - smartify_test_internal
+      - internal
       - external
     
 
@@ -58,7 +58,7 @@ services:
     restart: always
     networks:
       - external
-      - smartify_test_internal
+      - internal
 
 #  frontend:
 #    build: ./frontend
@@ -73,7 +73,6 @@ services:
 
 networks:
   internal:
-    name: smartify_test_internal
     internal: true
   external:
 
