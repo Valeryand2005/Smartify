@@ -4,7 +4,7 @@ set -e
 echo "Running login test..."
 
 RESPONSE=$(curl -s -w "\n%{http_code}" \
-  -X POST http://localhost:22025/api/login \
+  -X POST http://localhost:22026/api/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@mail.com", "password":"Loh1725!"}')
 

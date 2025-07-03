@@ -7,12 +7,12 @@ services:
       - "1025:1025"
       - "8025:8025"
     networks:
-      - internal
+      - smartify_test_internal
       - external
   db:
     image: postgres:15
     ports:
-      - "5434:5432"
+      - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -22,13 +22,13 @@ services:
       - POSTGRES_DB=smartify
     restart: always
     networks:
-      - internal
+      - smartify_test_internal
       - external
 
   mongo:
     image: mongo:7.0
     ports:
-      - "27018:27017"
+      - "27019:27017"
     volumes:
       - mongo_data:/data/db
       - ./database:/docker-entrypoint-initdb.d
@@ -38,7 +38,7 @@ services:
       - MONGO_INITDB_DATABASE=smartify
     restart: always
     networks:
-      - internal
+      - smartify_test_internal
       - external
     
 
@@ -47,7 +47,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile 
     ports:
-      - "22025:8080"
+      - "22026:8080"
     depends_on:
       - db
       - mongo
@@ -58,7 +58,7 @@ services:
     restart: always
     networks:
       - external
-      - internal
+      - smartify_test_internal
 
 #  frontend:
 #    build: ./frontend
@@ -73,9 +73,10 @@ services:
 
 networks:
   internal:
+    name: smartify_test_internal
     internal: true
   external:
 
 volumes:
-  postgres_data:
-  mongo_data:
+  postgres_test_data:
+  mongo_test_data:
