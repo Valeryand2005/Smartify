@@ -14,7 +14,8 @@ jobs:
     runs-on: [self-hosted]
 
     env:
-      URI: http://localhost:22025/api
+      URI: http://127.0.0.1:22025/api
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,6 +31,7 @@ jobs:
       - name: Wait for services to be healthy
         run: |
           echo "Waiting for backend to be healthy..."
+          echo "URI is: ${URI}"
           for i in {1..60}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${URI}/hello)
             if [ "$STATUS" -eq 200 ]; then
