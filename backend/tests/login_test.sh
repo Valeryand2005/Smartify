@@ -6,7 +6,7 @@ echo "Running login test..."
 RESPONSE=$(curl -s -w "\n%{http_code}" \
   -X POST http://localhost:22025/api/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"prov_1725@mail.ru", "password":"Loh1725!"}')
+  -d '{"email":"test@mail.com", "password":"Loh1725!"}')
 
 BODY=$(echo "$RESPONSE" | head -n 1)
 STATUS=$(echo "$RESPONSE" | tail -n 1)
@@ -17,6 +17,7 @@ if [ "$STATUS" -ne 200 ]; then
 fi
 
 ACCESS_TOKEN=$(echo "$BODY" | jq -r '.access_token')
+
 REFRESH_TOKEN=$(echo "$BODY" | jq -r '.refresh_token')
 
 if [ "$ACCESS_TOKEN" == "null" ] || [ -z "$REFRESH_TOKEN" ]; then
