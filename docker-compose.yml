@@ -45,7 +45,7 @@ services:
       - mongo
     env_file:
     - .env.production
-    container_name: backend
+    container_name: smartify_prod-backend
     restart: always
     networks:
       - external

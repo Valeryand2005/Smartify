@@ -23,6 +23,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Debug - Show current working directory and list files
+        run: |
+          echo "Текущая рабочая директория: $(pwd)"
+          echo "Список файлов в текущей директории:"
+          ls -la # Это покажет, присутствуют ли docker-compose.yml и docker-compose.override.yml
+
+      - name: Debug - Show Docker Compose files on runner
+        run: |
+          echo "--- Содержимое docker-compose.yml ---"
+          cat docker-compose.yml || echo "Файл docker-compose.yml не найден или недоступен для чтения."
+          echo "--- Содержимое docker-compose.override.yml ---"
+          cat docker-compose.override.yml || echo "Файл docker-compose.override.yml не найден или недоступен для чтения."
+
       - name: Build and start services
         run: |
           export COMPOSE_PROJECT_NAME=smartify_test
