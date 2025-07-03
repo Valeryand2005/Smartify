@@ -25,8 +25,9 @@ jobs:
 
       - name: Build and start services
         run: |
+          docker-compose pull || true
           docker-compose build &&
-          docker-compose up -d
+          docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
       
       - name: Run Mailhog container
         run: |
@@ -91,7 +92,7 @@ jobs:
       - name: Copy application files to remote server
         run: |
           ssh $REMOTE_USER@$REMOTE_HOST "mkdir -p ${APP_DIR}"
-
+          scp -r .env.production $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
           scp -r docker-compose.yml $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
           scp -r backend/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
           scp -r database/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}

@@ -44,7 +44,7 @@ services:
       - db
       - mongo
     env_file:
-    - .env.production
+    - .env.test
     container_name: backend
     restart: always
     networks:

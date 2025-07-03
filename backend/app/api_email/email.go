@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/smtp"
+	"os"
 	"sync"
 	"time"
 )
@@ -58,11 +59,25 @@ func sendEmailWithRetry(to, subject, body string, maxRetries int) error {
 }
 
 func sendEmail(to, subject, body string) error {
-	// Настройки SMTP-сервера
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
-	smtpUsername := "projectsmartifyapp@gmail.com"
-	smtpPassword := "iegn yhso uqye ikrm"
+	smtpHost := os.Getenv("SMTP_HOST")
+	if smtpHost == "" {
+		smtpHost = "smtp.gmail.com"
+	}
+
+	smtpPort := os.Getenv("SMTP_PORT")
+	if smtpPort == "" {
+		smtpPort = "587"
+	}
+
+	smtpUsername := os.Getenv("SMTP_USERNAME")
+	if smtpUsername == "" {
+		smtpUsername = "projectsmartifyapp@gmail.com"
+	}
+
+	smtpPassword := os.Getenv("SMTP_PASSWORD")
+	if smtpPassword == "" {
+		smtpPassword = "iegn yhso uqye ikrm"
+	}
 
 	// Формируем письмо
 	msg := []byte(
