@@ -54,7 +54,7 @@ services:
       - mailhog
     env_file:
     - .env.test
-    container_name: backend
+    container_name: backend_test
     restart: always
     networks:
       - external
