@@ -45,6 +45,7 @@ services:
     
 
   backend:
+    container_name: backend_test
     build: 
       context: ./backend
       dockerfile: Dockerfile 
@@ -56,7 +57,6 @@ services:
       - mailhog
     env_file:
     - .env.test
-    container_name: backend_test
     restart: always
     networks:
       - external
