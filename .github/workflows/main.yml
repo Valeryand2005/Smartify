@@ -4,10 +4,10 @@ name: Smartify CI/CD
 on:
   push:
     branches:
-      - Back
+      - main
   pull_request:
     branches:
-      - Back
+      - main
 
 jobs:
   test:
@@ -25,22 +25,15 @@ jobs:
 
       - name: Build and start services
         run: |
+          docker-compose pull || true
           docker-compose build &&
-          docker-compose up -d
-      
-      - name: Run Mailhog container
-        run: |
-            docker run -d \
-              --name mailhog \
-              -p 1025:1025 \
-              -p 8025:8025 \
-              mailhog/mailhog
+          docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 
       - name: Wait for services to be healthy
         run: |
           echo "Waiting for backend to be healthy..."
           echo "URI is: ${URI}"
-          for i in {1..10}; do
+          for i in {1..20}; do
             sleep 1
           done
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${URI}/hello)
@@ -49,6 +42,18 @@ jobs:
             exit 0
           fi
           echo "❌ Backend did not start"
+          docker-compose logs
+          exit 1
+
+      - name: Check maildog
+        run: |
+          echo "Waiting for maildog to be healthy..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8025/api/v2/messages)
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ maildog is up!"
+            exit 0
+          fi
+          echo "❌ maildog did not start"
           docker-compose logs
           exit 1
 
@@ -62,8 +67,6 @@ jobs:
       - name: Stop containers
         if: always()
         run: |
-          docker stop mailhog
-          docker rm -f mailhog
           docker-compose down
         
 
@@ -91,7 +94,7 @@ jobs:
       - name: Copy application files to remote server
         run: |
           ssh $REMOTE_USER@$REMOTE_HOST "mkdir -p ${APP_DIR}"
-
+          scp -r .env.production $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
           scp -r docker-compose.yml $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
           scp -r backend/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}
           scp -r database/ $REMOTE_USER@$REMOTE_HOST:${APP_DIR}

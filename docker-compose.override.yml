@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - internal
+      - external
   db:
     image: postgres:15
     ports:
@@ -43,8 +51,9 @@ services:
     depends_on:
       - db
       - mongo
+      - mailhog
     env_file:
-    - .env.production
+    - .env.test
     container_name: backend
     restart: always
     networks:
