@@ -26,12 +26,11 @@ MAILHOG_CODE=""
 for i in {1..10}; do
     echo "Attempt $i to get code from MailHog..."
     MAILHOG_FULL_RESPONSE=$(curl -s http://localhost:8025/api/v2/messages)
-    
-    MAILHOG_CODE=$(echo "$MAILHOG_FULL_RESPONSE" \
-        | jq -r '.items[0].Content.Body' 2>/dev/null \
-        | grep -o '[0-9]\{6\}' || echo "")
 
-    if [ -n "$MAILHOG_CODE" ]; then
+    RECEIVED_CODE=$(echo "$MAILHOG_FULL_RESPONSE" | jq -r '.items[0].Content.Body' 2>/dev/null)
+
+    if [ -n "$RECEIVED_CODE" ]; then
+        MAILHOG_CODE="$RECEIVED_CODE"
         echo "✅ MailHog code found: $MAILHOG_CODE"
         break
     fi
