@@ -39,10 +39,10 @@ jobs:
       - name: Build and start services
         run: |
           export COMPOSE_PROJECT_NAME=smartify_test
-          docker-compose -f docker-compose.yml -f docker-compose.override.yml down --rmi all --volumes --remove-orphans || true
+          docker-compose -f docker-compose.override.yml down --rmi all --volumes --remove-orphans || true
           docker-compose pull || true
-          docker-compose -f docker-compose.yml -f docker-compose.override.yml build &&
-          docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+          docker-compose -f docker-compose.override.yml build &&
+          docker-compose -f docker-compose.override.yml up -d
 
       - name: Wait for services to be healthy
         run: |
@@ -83,7 +83,7 @@ jobs:
         if: always()
         run: |
           export COMPOSE_PROJECT_NAME=smartify_test 
-          docker-compose -f docker-compose.yml -f docker-compose.override.yml down --rmi all --volumes --remove-orphans || true
+          docker-compose -f docker-compose.override.yml down --rmi all --volumes --remove-orphans || true
           docker-compose down
         
 
