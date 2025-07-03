@@ -166,7 +166,7 @@ func AddQuestionnaire(questionnaire Questionnaire) error {
 	}
 
 	var existing Profession
-	err := collection.FindOne(ctx, bson.M{"userid": questionnaire.UserID}).Decode(&existing)
+	err := collection.FindOne(ctx, bson.M{"user_id": questionnaire.UserID}).Decode(&existing)
 
 	if err == mongo.ErrNoDocuments {
 		_, err1 := collection.InsertOne(ctx, questionnaire)
