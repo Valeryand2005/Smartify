@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+#Hi
+
 echo "Running registration test..."
 
 RESPONSE = $(curl -X POST http://localhost:22025/api/registration_emailvalidation \
