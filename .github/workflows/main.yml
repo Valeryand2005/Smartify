@@ -68,6 +68,8 @@ jobs:
       - name: Stop containers
         if: always()
         run: |
+          export COMPOSE_PROJECT_NAME=smartify_test 
+          docker-compose -f docker-compose.yml -f docker-compose.override.yml down --rmi all --volumes --remove-orphans || true
           docker-compose down
         
 
@@ -105,6 +107,7 @@ jobs:
       - name: Build and deploy Docker containers on remote server
         run: |
           ssh $REMOTE_USER@$REMOTE_HOST "
+            export COMPOSE_PROJECT_NAME=smartify_prod
             cd ${APP_DIR} &&
             docker-compose build &&
             docker-compose up -d
