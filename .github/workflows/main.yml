@@ -44,13 +44,10 @@ jobs:
           echo "❌ Backend did not start"
           docker-compose logs
           exit 1
-          
+
       - name: Check maildog
         run: |
           echo "Waiting for maildog to be healthy..."
-          for i in {1..20}; do
-            sleep 1
-          done
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8025/api/v2/messages)
           if [ "$STATUS" -eq 200 ]; then
             echo "✅ maildog is up!"

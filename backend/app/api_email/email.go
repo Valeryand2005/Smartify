@@ -60,24 +60,9 @@ func sendEmailWithRetry(to, subject, body string, maxRetries int) error {
 
 func sendEmail(to, subject, body string) error {
 	smtpHost := os.Getenv("SMTP_HOST")
-	if smtpHost == "" {
-		smtpHost = "smtp.gmail.com"
-	}
-
 	smtpPort := os.Getenv("SMTP_PORT")
-	if smtpPort == "" {
-		smtpPort = "587"
-	}
-
 	smtpUsername := os.Getenv("SMTP_USERNAME")
-	if smtpUsername == "" {
-		smtpUsername = "projectsmartifyapp@gmail.com"
-	}
-
 	smtpPassword := os.Getenv("SMTP_PASSWORD")
-	if smtpPassword == "" {
-		smtpPassword = "iegn yhso uqye ikrm"
-	}
 
 	// Формируем письмо
 	msg := []byte(
@@ -88,7 +73,12 @@ func sendEmail(to, subject, body string) error {
 	)
 
 	// Аутентификация и отправка с таймаутом
-	auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpHost)
+	var auth smtp.Auth
+	if smtpUsername != "" && smtpPassword != "" {
+		auth = smtp.PlainAuth("", smtpUsername, smtpPassword, smtpHost)
+	} else {
+		auth = nil
+	}
 
 	// Создаем контекст с таймаутом
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
