@@ -28,14 +28,6 @@ jobs:
           docker-compose pull || true
           docker-compose build &&
           docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
-      
-      - name: Run Mailhog container
-        run: |
-            docker run -d \
-              --name mailhog \
-              -p 1025:1025 \
-              -p 8025:8025 \
-              mailhog/mailhog
 
       - name: Wait for services to be healthy
         run: |
@@ -63,8 +55,6 @@ jobs:
       - name: Stop containers
         if: always()
         run: |
-          docker stop mailhog
-          docker rm -f mailhog
           docker-compose down
         
 
