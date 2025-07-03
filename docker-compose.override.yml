@@ -1,12 +1,21 @@
 version: '3.8'
 
 services:
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - internal
+      - external
   db:
     image: postgres:15
+    container_name: db_test
     ports:
-      - "5434:5432"
+      - "5435:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_test_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - POSTGRES_USER=postgres
@@ -19,10 +28,11 @@ services:
 
   mongo:
     image: mongo:7.0
+    container_name: mongo_test
     ports:
-      - "27018:27017"
+      - "27019:27017"
     volumes:
-      - mongo_data:/data/db
+      - mongo_test_data:/data/db
       - ./database:/docker-entrypoint-initdb.d
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
@@ -35,17 +45,18 @@ services:
     
 
   backend:
+    container_name: backend_test
     build: 
       context: ./backend
       dockerfile: Dockerfile 
     ports:
-      - "22025:8080"
+      - "8080:8080"
     depends_on:
       - db
       - mongo
+      - mailhog
     env_file:
-    - .env.production
-    container_name: smartify_prod-backend
+    - .env.test
     restart: always
     networks:
       - external
@@ -68,5 +79,5 @@ networks:
   external:
 
 volumes:
-  postgres_data:
-  mongo_data:
+  postgres_test_data:
+  mongo_test_data:

@@ -14,6 +14,9 @@ import (
 )
 
 func main() {
+	// Проверка работы
+	http.HandleFunc("/api/hello", api.HelloHandler)
+
 	// Вход в аккаунт
 	http.HandleFunc("/api/login", api.LoginHandler)
 
