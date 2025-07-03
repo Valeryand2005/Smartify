@@ -40,7 +40,7 @@ jobs:
             sleep 2
           done
           echo "❌ Backend did not start"
-          docker compose logs
+          docker-compose logs
           exit 1
 
       - name: Run integration tests
@@ -51,7 +51,7 @@ jobs:
       - name: Stop containers
         if: always()
         run: |
-          docker compose down
+          docker-compose down
         
 
 
