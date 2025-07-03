@@ -12,7 +12,9 @@ RESPONSE=$(curl -X POST http://localhost:22025/api/registration_emailvalidation 
 BODY=$(echo "$RESPONSE" | head -n -1)
 STATUS=$(echo "$RESPONSE" | tail -n1)
 
-if [ "$STATUS" -ne 200 ]; then
+CODE_VALUE=$(echo "$STATUS" | jq -r '.code')
+
+if [ "$CODE_VALUE" -ne 200 ]; then
   echo "❌ Registration emailvalidation failed: HTTP $STATUS"
   echo "$BODY"
   exit 1
@@ -36,9 +38,9 @@ RESPONSE=$(curl -X POST http://localhost:22025/api/registration_codevalidation \
      -d '{"email":"test@mail.com","code":"'"$MAIL_CODE"'"}')
 
 BODY=$(echo "$RESPONSE" | head -n -1)
-STATUS=$(echo "$RESPONSE" | tail -n1)
+CODE_VALUE=$(echo "$STATUS" | jq -r '.code')
 
-if [ "$STATUS" -ne 200 ]; then
+if [ "$CODE_VALUE" -ne 200 ]; then
   echo "❌ Registration codevalidation failed: HTTP $STATUS"
   echo "$BODY"
   exit 1
@@ -51,9 +53,9 @@ RESPONSE=$(curl -X POST http://localhost:22025/api/registration_password \
      -d '{"email":"test@mail.com","password":"Loh1725!"}')
 
 BODY=$(echo "$RESPONSE" | head -n -1)
-STATUS=$(echo "$RESPONSE" | tail -n1)
+CODE_VALUE=$(echo "$STATUS" | jq -r '.code')
 
-if [ "$STATUS" -ne 200 ]; then
+if [ "$CODE_VALUE" -ne 200 ]; then
   echo "❌ Registration registration_password failed: HTTP $STATUS"
   echo "$BODY"
   exit 1
