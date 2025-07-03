@@ -22,15 +22,26 @@ fi
 
 echo "✅ Email validation request succeeded"
 
-CODE=$(curl -s http://localhost:8025/api/v2/messages \
-     | jq -r '.items[0].Content.Body' \
-     | grep -o '[0-9]\{6\}')
-echo "MAIL_CODE=$CODE" >> $GITHUB_ENV
+MAILHOG_CODE=""
+for i in {1..10}; do
+    echo "Attempt $i to get code from MailHog..."
+    MAILHOG_FULL_RESPONSE=$(curl -s http://localhost:8025/api/v2/messages)
+    
+    MAILHOG_CODE=$(echo "$MAILHOG_FULL_RESPONSE" \
+        | jq -r '.items[0].Content.Body' 2>/dev/null \
+        | grep -o '[0-9]\{6\}' || echo "")
 
-if [ -z "$CODE" ]; then
-  echo "❌ No code found in Mailhog email."
-  echo "$CODE"
-  exit 1
+    if [ -n "$MAILHOG_CODE" ]; then
+        echo "✅ MailHog code found: $MAILHOG_CODE"
+        break
+    fi
+    sleep 2
+done
+
+if [ -z "$MAILHOG_CODE" ]; then
+    echo "❌ No code found in Mailhog email after multiple attempts."
+    echo "MailHog Raw Response: $MAILHOG_FULL_RESPONSE"
+    exit 1
 fi
 
 
