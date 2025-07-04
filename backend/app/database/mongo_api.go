@@ -178,7 +178,7 @@ func AddQuestionnaire(questionnaire Questionnaire) error {
 	} else if err != nil {
 		return err
 	} else if questionnaire.TimeStamp.After(existing.TimeStamp) {
-		_, updateErr := collection.ReplaceOne(ctx, bson.M{"userid": questionnaire.UserID}, questionnaire)
+		_, updateErr := collection.ReplaceOne(ctx, bson.M{"user_id": questionnaire.UserID}, questionnaire)
 		if updateErr != nil {
 			return updateErr
 		}
