@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';  // <-- импорт
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:smartify/pages/tracker/tracker_classes.dart';  
 
 class CalendarPage extends StatefulWidget {
-  final List<Map<String, dynamic>> subjects;
+  final List<Subject> subjects;
 
   const CalendarPage({super.key, required this.subjects});
 
@@ -27,22 +28,22 @@ class _CalendarPageState extends State<CalendarPage> {
     _localeFuture = initializeDateFormatting('ru');
   }
 
-  List<Map<String, dynamic>> _tasksForSelectedDate() {
-    List<Map<String, dynamic>> tasks = [];
+  List<TaskCalendar> _tasksForSelectedDate() {
+    List<TaskCalendar> tasks = [];
     for (var subject in widget.subjects) {
-      for (var task in subject["tasks"]) {
-        DateTime? deadline = task["deadline"];
+      for (var task in subject.tasks) {
+        DateTime? deadline = task.deadline;
         if (deadline != null &&
             deadline.year == _selectedDate.year &&
             deadline.month == _selectedDate.month &&
             deadline.day == _selectedDate.day) {
-          tasks.add({
-            "subject": subject["title"],
-            "color": subject["color"],
-            "title": task["title"],
-            "duration": task["duration"],
-            "completed": task["completed"],
-          });
+          tasks.add(TaskCalendar.fromJson({
+            "subject": subject.title,
+            "color": subject.color,
+            "title": task.title,
+            "duration": task.duration,
+            "completed": task.isCompleted,
+          }));
         }
       }
     }
@@ -55,7 +56,7 @@ class _CalendarPageState extends State<CalendarPage> {
       future: _localeFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          List<Map<String, dynamic>> tasks = _tasksForSelectedDate();
+          List<TaskCalendar> tasks = _tasksForSelectedDate();
 
           return Scaffold(
             appBar: AppBar(
@@ -134,17 +135,17 @@ class _CalendarPageState extends State<CalendarPage> {
                       : ListView.builder(
                           itemCount: tasks.length,
                           itemBuilder: (context, index) {
-                            var task = tasks[index];
+                            TaskCalendar task = tasks[index];
                             return ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: task["color"],
-                                child: Text(task["subject"][0]),
+                                backgroundColor: task.color,
+                                child: Text(task.subjectTitle[0]),
                               ),
-                              title: Text(task["title"]),
-                              subtitle: Text("Длительность: ${task["duration"]}"),
+                              title: Text(task.title),
+                              subtitle: Text("Длительность: ${task.duration}"),
                               trailing: Icon(
-                                task["completed"] ? Icons.check_circle : Icons.pending,
-                                color: task["completed"] ? Colors.green : Colors.orange,
+                                task.isCompleted ? Icons.check_circle : Icons.pending,
+                                color: task.isCompleted ? Colors.green : Colors.orange,
                               ),
                             );
                           },
