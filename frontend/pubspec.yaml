@@ -71,6 +71,7 @@ flutter:
       - university.png
       - career.png
       - assets/universities.json
+      - assets/teachers.json
       - assets/user_avatar.jpg
       - assets/profession_test.docx
       - assets/professions.json
