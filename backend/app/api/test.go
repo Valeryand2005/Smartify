@@ -44,6 +44,14 @@ func ToMongoProf(userID int, q []ml.ProfessionPred) (database.ProfessionRec, err
 	return rec, nil
 }
 
+// @Summary      Создание новой анкеты
+// @Description  Доступно только аутентифицированным пользователям
+// @Tags         questionnaire
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Router       /questionnaire [post]
+// http.HandleFunc("/api/questionnaire", api.AddQuestionnaireHandler)
 func AddQuestionnaireHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
