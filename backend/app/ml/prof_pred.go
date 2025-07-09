@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"time"
 )
 
 type ProfessionPred struct {
@@ -27,7 +26,6 @@ type QuestionnairePred struct {
 	Values           []string        `json:"values" bson:"values"`
 	MBTIScores       map[string]int  `json:"mbti_scores" bson:"mbti_scores"`
 	WorkPreferences  WorkPreferences `json:"work_preferences" bson:"work_preferences"`
-	TimeStamp        time.Time       `bson:"timestamp" json:"timestamp"`
 }
 
 type WorkPreferences struct {
