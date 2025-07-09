@@ -267,7 +267,7 @@ func AddTutor(t Tutor) error {
 		return nil
 	} else if err != nil {
 		return err
-	} else if p.TimeStamp.After(existing.TimeStamp) {
+	} else if t.TimeStamp.After(existing.TimeStamp) {
 		_, updateErr := collection.ReplaceOne(ctx, bson.M{"user_id": t.UserID}, t)
 		if updateErr != nil {
 			return updateErr

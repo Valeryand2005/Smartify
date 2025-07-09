@@ -2,12 +2,10 @@ package api
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/auth"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
-	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/ml"
 )
 
 func ChangeTutorInformation(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +21,7 @@ func ChangeTutorInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var q database.Questionnaire
+	var q database.Tutor
 	if err := json.NewDecoder(r.Body).Decode(&q); err != nil {
 		http.Error(w, "Invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
@@ -36,43 +34,27 @@ func ChangeTutorInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var user database.User
+
+	err := database.FindUserByID(userID, &user, db)
+
+	if err != nil {
+		http.Error(w, "Database error or user is invalid", http.StatusInternalServerError)
+		return
+	}
+
+	if user.User_role != "tutor" {
+		http.Error(w, "User isn't tutor", http.StatusInternalServerError)
+		return
+	}
+
 	q.UserID = userID
 
-	if err := database.AddQuestionnaire(q); err != nil {
+	if err := database.AddTutor(q); err != nil {
 		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	q_pred, err := ToQuestionnairePred(q)
-
-	if err != nil {
-		http.Error(w, "Error converting questionnaire: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	result, err := ml.MLProf(q_pred)
-
-	if err != nil {
-		http.Error(w, "Error in ML prediction: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	log.Printf("ML prediction result for user %d: %+v\n", userID, result)
-
-	profession_pred_mongo, err := ToMongoProf(userID, result)
-
-	if err != nil {
-		http.Error(w, "Error converting profession recommendations: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	database.AddProfessionRecommendation(profession_pred_mongo)
-
-	if err != nil {
-		http.Error(w, "Error converting questionnaire: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "Tutor updated"})
 }

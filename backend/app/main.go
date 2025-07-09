@@ -37,6 +37,8 @@ func main() {
 	//http.HandleFunc("/api/questionnaire", api.AddQuestionnaireHandler)
 	http.Handle("/api/questionnaire", auth.Access(http.HandlerFunc(api.AddQuestionnaireHandler)))
 
+	//Добавление или обновление tutor
+	http.Handle("/api/add_tutor", auth.Access(http.HandlerFunc(api.ChangeTutorInformation)))
 	// Для подтверждения по ссылке
 	/* -----------------------------------------------------------------------
 		http.Handle("/reset_password_page/",
