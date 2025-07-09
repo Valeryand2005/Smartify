@@ -61,6 +61,20 @@ type WorkPreferences struct {
 	Exclude string `json:"exclude" bson:"exclude"`
 }
 
+type ProfessionRec struct {
+	UserID           int                `json:"user_id" bson:"user_id"`
+	ProfessionPredic []ProfessionPredic `json:"profession_predic" bson:"profession_predic"`
+	TimeStamp        time.Time          `bson:"timestamp" json:"timestamp"`
+}
+
+type ProfessionPredic struct {
+	Name        string   `json:"name"`
+	Score       float64  `json:"score"`
+	Positives   []string `json:"positives"`
+	Negatives   []string `json:"negatives"`
+	Description string   `json:"description"`
+}
+
 func ConnectMongo(uri string) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -187,5 +201,39 @@ func AddQuestionnaire(questionnaire Questionnaire) error {
 	}
 
 	log.Println("Questionnaire not updated: older timestamp")
+	return nil
+}
+
+func AddProfessionRecommendation(p ProfessionRec) error {
+	collection := mongoClient.Database("smartify").Collection("ProfessionRecommendation")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	if p.TimeStamp.IsZero() {
+		p.TimeStamp = time.Now()
+	}
+
+	var existing Profession
+	err := collection.FindOne(ctx, bson.M{"user_id": p.UserID}).Decode(&existing)
+
+	if err == mongo.ErrNoDocuments {
+		_, err1 := collection.InsertOne(ctx, p)
+		if err1 != nil {
+			return err1
+		}
+		log.Println("Successfully inserted Profession Recommendation!")
+		return nil
+	} else if err != nil {
+		return err
+	} else if p.TimeStamp.After(existing.TimeStamp) {
+		_, updateErr := collection.ReplaceOne(ctx, bson.M{"user_id": p.UserID}, p)
+		if updateErr != nil {
+			return updateErr
+		}
+		log.Println("Successfully updated Profession Recommendation!")
+		return nil
+	}
+
+	log.Println("Profession Recommendation not updated: older timestamp")
 	return nil
 }

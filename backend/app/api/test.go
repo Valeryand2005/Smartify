@@ -22,6 +22,28 @@ func ToQuestionnairePred(q database.Questionnaire) (ml.QuestionnairePred, error)
 	return pred, err
 }
 
+func ToMongoProf(userID int, q []ml.ProfessionPred) (database.ProfessionRec, error) {
+
+	var preds []database.ProfessionPredic
+
+	for _, r := range q {
+		p := database.ProfessionPredic{
+			Name:        r.Name,
+			Score:       r.Score,
+			Positives:   r.Positives,
+			Negatives:   r.Negatives,
+			Description: r.Description,
+		}
+		preds = append(preds, p)
+	}
+
+	rec := database.ProfessionRec{
+		UserID:           userID,
+		ProfessionPredic: preds,
+	}
+	return rec, nil
+}
+
 func AddQuestionnaireHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -71,6 +93,20 @@ func AddQuestionnaireHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("ML prediction result for user %d: %+v\n", userID, result)
+
+	profession_pred_mongo, err := ToMongoProf(userID, result)
+
+	if err != nil {
+		http.Error(w, "Error converting profession recommendations: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	database.AddProfessionRecommendation(profession_pred_mongo)
+
+	if err != nil {
+		http.Error(w, "Error converting questionnaire: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
