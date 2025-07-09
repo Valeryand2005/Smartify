@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:intl/intl.dart';
+import 'package:smartify/pages/tracker/calendar_page.dart'; 
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({super.key});
@@ -57,49 +59,91 @@ class _ProgressPageState extends State<ProgressPage> {
     );
   }
 
+  Future<DateTime?> _pickDate(DateTime? initialDate) async {
+    DateTime now = DateTime.now();
+    return await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? now,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 5),
+    );
+  }
+
   void _addTask(int subjectIndex) {
     String title = "";
     String duration = "";
+    DateTime? deadline;
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Новое задание"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                autofocus: true,
-                decoration: const InputDecoration(labelText: "Название"),
-                onChanged: (val) => title = val,
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text("Новое задание"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    autofocus: true,
+                    decoration: const InputDecoration(labelText: "Название"),
+                    onChanged: (val) => title = val,
+                  ),
+                  TextField(
+                    decoration: const InputDecoration(labelText: "Длительность"),
+                    onChanged: (val) => duration = val,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Text("Дедлайн: "),
+                      Expanded(
+                        child: Text(
+                          deadline != null
+                              ? DateFormat('dd.MM.yyyy').format(deadline!)
+                              : '',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          DateTime? picked = await _pickDate(deadline);
+                          if (picked != null) {
+                            setStateDialog(() {
+                              deadline = picked;
+                            });
+                          }
+                        },
+                        child: const Text("Выбрать"),
+                      )
+                    ],
+                  ),
+                ],
               ),
-              TextField(
-                decoration: const InputDecoration(labelText: "Длительность"),
-                onChanged: (val) => duration = val,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Отмена"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (title.trim().isNotEmpty) {
-                  setState(() {
-                    subjects[subjectIndex]["tasks"].add({
-                      "title": title,
-                      "duration": duration,
-                      "completed": false,
-                    });
-                  });
-                }
-                Navigator.pop(context);
-              },
-              child: const Text("Добавить"),
-            )
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Отмена"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (title.trim().isNotEmpty) {
+                      setState(() {
+                        subjects[subjectIndex]["tasks"].add({
+                          "title": title,
+                          "duration": duration,
+                          "completed": false,
+                          "deadline": deadline,
+                        });
+                      });
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Добавить"),
+                )
+              ],
+            );
+          },
         );
       },
     );
@@ -108,43 +152,73 @@ class _ProgressPageState extends State<ProgressPage> {
   void _editTask(int subjectIndex, int taskIndex) {
     String title = subjects[subjectIndex]["tasks"][taskIndex]["title"];
     String duration = subjects[subjectIndex]["tasks"][taskIndex]["duration"];
+    DateTime? deadline = subjects[subjectIndex]["tasks"][taskIndex]["deadline"];
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Редактировать задание"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: TextEditingController(text: title),
-                decoration: const InputDecoration(labelText: "Название"),
-                onChanged: (val) => title = val,
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text("Редактировать задание"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: TextEditingController(text: title),
+                    decoration: const InputDecoration(labelText: "Название"),
+                    onChanged: (val) => title = val,
+                  ),
+                  TextField(
+                    controller: TextEditingController(text: duration),
+                    decoration: const InputDecoration(labelText: "Длительность"),
+                    onChanged: (val) => duration = val,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Text("Дедлайн: "),
+                      Expanded(
+                        child: Text(
+                          deadline != null
+                              ? DateFormat('dd.MM.yyyy').format(deadline!):'',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          DateTime? picked = await _pickDate(deadline);
+                          if (picked != null) {
+                            setStateDialog(() {
+                              deadline = picked;
+                            });
+                          }
+                        },
+                        child: const Text("Выбрать"),
+                      )
+                    ],
+                  ),
+                ],
               ),
-              TextField(
-                controller: TextEditingController(text: duration),
-                decoration: const InputDecoration(labelText: "Длительность"),
-                onChanged: (val) => duration = val,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Отмена"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  subjects[subjectIndex]["tasks"][taskIndex]["title"] = title;
-                  subjects[subjectIndex]["tasks"][taskIndex]["duration"] = duration;
-                });
-                Navigator.pop(context);
-              },
-              child: const Text("Сохранить"),
-            )
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Отмена"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      subjects[subjectIndex]["tasks"][taskIndex]["title"] = title;
+                      subjects[subjectIndex]["tasks"][taskIndex]["duration"] = duration;
+                      subjects[subjectIndex]["tasks"][taskIndex]["deadline"] = deadline;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Сохранить"),
+                )
+              ],
+            );
+          },
         );
       },
     );
@@ -154,6 +228,15 @@ class _ProgressPageState extends State<ProgressPage> {
     setState(() {
       subjects.removeAt(index);
     });
+  }
+
+  void _openCalendar() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CalendarPage(subjects: subjects),
+      ),
+    );
   }
 
   @override
@@ -173,16 +256,17 @@ class _ProgressPageState extends State<ProgressPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black,), 
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
-          },),
+          },
+        ),
         title: const Text('Прогресс', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today, color: Colors.black),
-            onPressed: () {},
+            onPressed: _openCalendar,
           ),
         ],
       ),
@@ -282,6 +366,7 @@ class _ProgressPageState extends State<ProgressPage> {
                 ...subject["tasks"].asMap().entries.map((entry) {
                   int taskIndex = entry.key;
                   var task = entry.value;
+                  DateTime? deadline = task["deadline"];
                   return GestureDetector(
                     onTap: () => _editTask(subjectIndex, taskIndex),
                     child: Container(
@@ -315,6 +400,11 @@ class _ProgressPageState extends State<ProgressPage> {
                             task["duration"],
                             style: const TextStyle(color: Colors.white70, fontSize: 10),
                           ),
+                          if (deadline != null)
+                            Text(
+                              "Дедлайн: ${DateFormat('dd.MM.yyyy').format(deadline)}",
+                              style: const TextStyle(color: Colors.white70, fontSize: 10, fontStyle: FontStyle.italic),
+                            ),
                         ],
                       ),
                     ),

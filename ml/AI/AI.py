@@ -1,6 +1,8 @@
 import json
 
-# Словарь описаний MBTI-типов (добавьте остальные по аналогии)
+# ------------------------------------------
+# MBTI Descriptions
+# ------------------------------------------
 MBTI_DESCRIPTIONS = {
     "INTJ": {
         "name": "Стратег",
@@ -22,8 +24,6 @@ MBTI_DESCRIPTIONS = {
         "description": "Целеустремлённый лидер, рационален и напорист. Организует команды и добивается результата. Часто работает: управляющим, топ-менеджером, юристом, военным, стратегом.",
         "example": "Стив Джобс"
     },
-
-    ### 🎨 Идеалисты (Дипломаты)
     "INFJ": {
         "name": "Активист",
         "description": "Интроверт с развитой интуицией, глубоко понимающий других. Ценит мораль, стремится к справедливости. Подходит: психолог, писатель, педагог, коуч, благотворитель.",
@@ -44,8 +44,6 @@ MBTI_DESCRIPTIONS = {
         "description": "Харизматичный, интуитивный лидер, вдохновляющий других. Отличный мотиватор и коммуникатор. Профессии: оратор, преподаватель, HR, психолог, политик.",
         "example": "Опра Уинфри"
     },
-
-    ### 🛡 Хранители (Сенсорно-логические реалисты)
     "ISTJ": {
         "name": "Администратор",
         "description": "Надёжный, структурированный и ответственный. Ценит порядок и правила. Подходит: бухгалтер, юрист, военный, архивариус, администратор.",
@@ -66,8 +64,6 @@ MBTI_DESCRIPTIONS = {
         "description": "Дружелюбный и заботливый, отличный командный игрок. Предпочитает личные связи и стабильность. Часто работает: организатор мероприятий, продавец, педагог, консультант.",
         "example": "Моника Геллер (Друзья)"
     },
-
-    ### 🎯 Искатели (Энергичные реалисты)
     "ISTP": {
         "name": "Виртуоз",
         "description": "Независимый и изобретательный. Отлично решает практические задачи. Любит эксперименты. Подходит: инженер, механик, айтишник, пилот, архитектор.",
@@ -91,6 +87,9 @@ MBTI_DESCRIPTIONS = {
 }
 
 
+# ------------------------------------------
+# Определение MBTI
+# ------------------------------------------
 def determine_mbti(mbti_scores):
     def invert(score): return 8 - score
     direct_ei = {11, 12, 19, 28}
@@ -114,14 +113,83 @@ def determine_mbti(mbti_scores):
 
     return mbti
 
-# Загрузка исходных данных
-with open('database/dataset_career_test.json', encoding='utf-8') as f:
-    data = json.load(f)
 
-updated_data = []
+# ------------------------------------------
+# Оценка профессии
+# ------------------------------------------
+def score_profession_normalized(student, profession):
+    total_score = 0
+    reasons, negatives = [], []
 
-for entry in data:
-    mbti_scores = entry.get("mbti_scores", {})
+    subj_scores = student["subject_scores"]
+    required_subjects = [s.replace(" (базовый)", "").replace(" (профильный)", "").strip() for s in profession["ege_subjects"]]
+    max_subj_score = len(required_subjects) * 5
+
+    # Subjects (35%)
+    subj_sum = 0
+    matched_subjects = []
+    for subj in required_subjects:
+        mark = subj_scores.get(subj)
+        if mark:
+            subj_sum += mark
+            matched_subjects.append(f"{subj} ({mark})")
+            if mark <= 2:
+                negatives.append(f"{subj} — низкий балл ({mark})")
+        else:
+            negatives.append(f"{subj} — отсутствует в твоих предметах")
+
+    if matched_subjects:
+        reasons.append(f"Подходящие предметы и оценки: {', '.join(matched_subjects)}")
+
+    subj_score_norm = (subj_sum / max_subj_score) if max_subj_score else 0
+    total_score += subj_score_norm * 35
+
+    # MBTI (20%)
+    mbti_match = student["mbti_type"]["code"] in profession["mbti_types"].replace(" ", "").split(",")
+    if mbti_match:
+        reasons.append(f"Твой MBTI ({student['mbti_type']['code']}) подходит под эту профессию.")
+        total_score += 20
+    else:
+        negatives.append(f"MBTI {student['mbti_type']['code']} может не совпадать с типичными для этой профессии.")
+
+    # Interests (15%)
+    interest_match = set(student["interests"]) & set(profession.get("interests", []))
+    interest_score = len(interest_match) / len(profession.get("interests", []) or [1])
+    if interest_match:
+        reasons.append(f"Интересы совпадают: {', '.join(interest_match)}.")
+    total_score += interest_score * 15
+
+    # Values (15%)
+    value_match = set(student["values"]) & set(profession.get("values", []))
+    value_score = len(value_match) / len(profession.get("values", []) or [1])
+    if value_match:
+        reasons.append(f"Ценности совпадают: {', '.join(value_match)}.")
+    total_score += value_score * 15
+
+    # Preferences (10%)
+    pref = student["work_preferences"]
+    match_count = 0
+    for k in ["role", "place", "style"]:
+        if profession.get(k) == pref.get(k):
+            match_count += 1
+            reasons.append(f"Предпочтение по {k} совпадает: {profession[k]}")
+    total_score += (match_count / 3) * 10
+
+    # Exclusions (-25% per conflict)
+    for ex in pref.get("exclude", []):
+        if ex in profession.get("interests", []) or ex in profession.get("role", ""):
+            total_score -= 25
+            negatives.append(f"Ты хочешь избежать: {ex}, но профессия это подразумевает!")
+
+    total_score = max(min(total_score, 100), 0)
+    return round(total_score, 2), reasons, negatives
+
+
+# ------------------------------------------
+# Основная точка входа
+# ------------------------------------------
+def process_student(student, professions):
+    mbti_scores = student.get("mbti_scores", {})
     mbti_type = determine_mbti(mbti_scores)
     description = MBTI_DESCRIPTIONS.get(mbti_type, {
         "name": "Неизвестный тип",
@@ -129,24 +197,40 @@ for entry in data:
         "example": "-"
     })
 
-    # Обновляем данные
-    new_entry = entry.copy()
-    new_entry["mbti_type"] = {
+    student["mbti_type"] = {
         "code": mbti_type,
         "name": description["name"],
         "description": description["description"],
         "example": description["example"]
     }
+    if "mbti_scores" in student:
+        del student["mbti_scores"]
 
-    # Удаляем подробные ответы
-    if "mbti_scores" in new_entry:
-        del new_entry["mbti_scores"]
+    scored_professions = []
+    for prof in professions:
+        score, pos, neg = score_profession_normalized(student, prof)
+        scored_professions.append({
+            "name": prof["name"],
+            "score": score,
+            "positives": pos,
+            "negatives": neg,
+            "description": prof["description"]
+        })
 
-    updated_data.append(new_entry)
+    scored_professions.sort(key=lambda x: x["score"], reverse=True)
+    top5 = scored_professions[:5]
+    return top5
 
-# Сохраняем обновлённую базу
-output_file = "database/dataset_with_mbti_descriptions.json"
-with open(output_file, "w", encoding="utf-8") as f:
-    json.dump(updated_data, f, ensure_ascii=False, indent=2)
-
-print(f"✅ Готово! Новая база сохранена в {output_file}")
+# ------------------------------------------
+# Для теста отдельным запуском
+# ------------------------------------------
+if __name__ == "__main__":
+    with open("database/dataset_career_test.json", "r", encoding="utf-8") as f:
+        students = json.load(f)
+    with open("database/professions.json", "r", encoding="utf-8") as f:
+        professions = json.load(f)
+    student = students[0]  # выбери нужного студента
+    top5 = process_student(student, professions)
+    with open("database/profession_recommendations.json", "w", encoding="utf-8") as f:
+        json.dump(top5, f, ensure_ascii=False, indent=2)
+    print("✅ Рекомендации сохранены.")

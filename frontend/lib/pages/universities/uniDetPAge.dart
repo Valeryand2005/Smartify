@@ -1,9 +1,36 @@
 import 'package:flutter/material.dart';
 
-class UniversityDetailPage extends StatelessWidget {
+class UniversityDetailPage extends StatefulWidget {
   final Map university;
+  final bool isFavorite;
+  final Function(Map university) onFavoriteToggle;
 
-  const UniversityDetailPage({super.key, required this.university});
+  const UniversityDetailPage({
+    super.key,
+    required this.university,
+    required this.isFavorite,
+    required this.onFavoriteToggle,
+  });
+
+  @override
+  State<UniversityDetailPage> createState() => _UniversityDetailPageState();
+}
+
+class _UniversityDetailPageState extends State<UniversityDetailPage> {
+  late bool isFav;
+
+  @override
+  void initState() {
+    super.initState();
+    isFav = widget.isFavorite;
+  }
+
+  void toggleFavorite() {
+    setState(() {
+      isFav = !isFav;
+    });
+    widget.onFavoriteToggle(widget.university);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +41,7 @@ class UniversityDetailPage extends StatelessWidget {
           Stack(
             children: [
               Image.network(
-                university['фото'],
+                widget.university['фото'],
                 width: double.infinity,
                 height: 240,
                 fit: BoxFit.cover,
@@ -45,14 +72,20 @@ class UniversityDetailPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          university['название'],
+                          widget.university['название'],
                           style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal,
+                          ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.favorite_border, color: Colors.red),
-                        onPressed: () {}, // можно добавить в избранное
+                        icon: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: Colors.red,
+                        ),
+                        onPressed: toggleFavorite,
                       ),
                     ],
                   ),
@@ -61,7 +94,7 @@ class UniversityDetailPage extends StatelessWidget {
                       const Icon(Icons.location_on, size: 16, color: Colors.black54),
                       const SizedBox(width: 4),
                       Text(
-                        university['локация'] ?? 'Location unknown',
+                        widget.university['город'] ?? 'Город неизвестен',
                         style: const TextStyle(color: Colors.black54),
                       ),
                     ],
@@ -72,19 +105,19 @@ class UniversityDetailPage extends StatelessWidget {
                       const Icon(Icons.star, color: Colors.amber, size: 16),
                       const SizedBox(width: 4),
                       Text(
-                        (university['рейтинг'] ?? '4.0').toString(),
+                        (widget.university['рейтинг'] ?? '4.0').toString(),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text('Moto', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('Faculties', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text(university['девиз'] ?? 'No motto'),
-                  const SizedBox(height: 16),
-                  const Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(university['описание'] ?? 'No description'),
+                  ...List<Widget>.from(
+                    (widget.university['факультеты'] as List<dynamic>? ?? []).map(
+                      (faculty) => Text("• $faculty"),
+                    ),
+                  ),
                 ],
               ),
             ),
