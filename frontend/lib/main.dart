@@ -4,9 +4,7 @@ import 'package:smartify/pages/tracker/main_tracker_page.dart';
 import 'package:smartify/pages/universities/main_university_page.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
 import 'package:smartify/pages/nav/nav_page.dart';
-import 'package:smartify/pages/api_server/api_token.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:smartify/pages/api_server/api_save_data.dart';
+import 'package:smartify/pages/recommendations/recommendation_screen.dart';
 
 void main() async {
   /**/
