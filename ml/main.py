@@ -12,4 +12,5 @@ app = FastAPI()
 async def recommend(req: Request):
     student = await req.json()
     top5 = process_student(student, PROFESSIONS)
+    print(top5)
     return top5
