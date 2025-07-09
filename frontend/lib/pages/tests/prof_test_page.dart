@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
 import 'package:smartify/pages/api_server/api_server.dart';
+import 'package:smartify/pages/api_server/api_save_prof.dart';
 import 'package:smartify/pages/recommendations/recommendation_screen.dart';
 
 void main() {
@@ -154,13 +155,23 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
           break;
       }
     }
-    final success = await ApiService.AddQuestionnaire(data);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(success ? "Анкета отправлена!" : "Ошибка при отправке анкеты"),
-      ),
-    );
+    final predictions = await ApiService.AddQuestionnaire(data);
+
+    if (predictions.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Анкета отправлена! Получено ${predictions.length} рекомендаций."),
+        ),
+      );
+      print(predictions);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Ошибка при отправке анкеты."),
+        ),
+      );
+    }
   }
 
   @override
