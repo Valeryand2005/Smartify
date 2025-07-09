@@ -279,3 +279,24 @@ func AddTutor(t Tutor) error {
 	log.Println("Tutor not updated: older timestamp")
 	return nil
 }
+
+func GetTutor(userID int) (Tutor, error) {
+	collection := mongoClient.Database("smartify").Collection("tutors")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	var existing Tutor
+	err := collection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&existing)
+
+	if err != nil {
+		return existing, err
+	}
+
+	if err != mongo.ErrNoDocuments {
+		log.Println("No tutor information")
+		return existing, nil
+	}
+
+	log.Println("Successfully get tutor information")
+	return existing, nil
+}
