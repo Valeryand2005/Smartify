@@ -3,6 +3,7 @@ import 'package:smartify/pages/tracker/main_tracker_page.dart';
 import 'package:smartify/pages/universities/main_university_page.dart';
 import 'package:smartify/pages/account/account_page.dart';
 import 'package:smartify/pages/professions/professions_page.dart';
+import 'package:smartify/pages/teachers/teachers_list_page.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -185,7 +186,14 @@ class _DashboardPageState extends State<DashboardPage> {
                       _WideButton(
                         title: 'Репетиторы',
                         subtitle: 'Более ста репетиторов',
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TeachersListPage(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(height: 20),
                     ],

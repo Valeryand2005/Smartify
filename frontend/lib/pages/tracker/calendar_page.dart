@@ -12,18 +12,23 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  DateTime _selectedDate = DateTime(2025, 6, 22); // как на скрине
+  DateTime _selectedDate = DateTime.now(); // Set to current date
   late Future<void> _localeFuture;
 
-  final List<DateTime> _dateRange = List.generate(
-    7,
-    (index) => DateTime(2025, 6, 19).add(Duration(days: index)),
-  );
+  late final List<DateTime> _dateRange;
 
   @override
   void initState() {
     super.initState();
     _localeFuture = initializeDateFormatting('ru');
+    // Generate dates from today to one month ahead
+    DateTime today = DateTime.now();
+    DateTime oneMonthAhead = DateTime(today.year, today.month + 1, today.day);
+    int days = oneMonthAhead.difference(today).inDays + 1;
+    _dateRange = List.generate(
+      days,
+      (index) => today.add(Duration(days: index)),
+    );
   }
 
   List<Map<String, dynamic>> _tasksForSelectedDate() {
@@ -211,7 +216,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        task["completed"] ? "Решено верно" : "Решено неверно",
+                                        task["completed"] ? "Решено верно" : "В процессе",
                                         style: TextStyle(
                                           color: task["completed"] ? Colors.green : Colors.redAccent,
                                           fontWeight: FontWeight.w500,
