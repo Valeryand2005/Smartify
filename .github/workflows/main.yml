@@ -4,10 +4,10 @@ name: Smartify CI/CD
 on:
   push:
     branches:
-      - main
+      - Back
   pull_request:
     branches:
-      - main
+      - Back
 
 jobs:
   test:

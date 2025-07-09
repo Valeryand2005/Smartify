@@ -2,11 +2,25 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/auth"
 	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/database"
+	"github.com/IU-Capstone-Project-2025/Smartify/backend/app/ml"
 )
+
+func ToQuestionnairePred(q database.Questionnaire) (ml.QuestionnairePred, error) {
+	var pred ml.QuestionnairePred
+
+	data, err := json.Marshal(q)
+	if err != nil {
+		return pred, err
+	}
+
+	err = json.Unmarshal(data, &pred)
+	return pred, err
+}
 
 func AddQuestionnaireHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -42,6 +56,22 @@ func AddQuestionnaireHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	q_pred, err := ToQuestionnairePred(q)
+
+	if err != nil {
+		http.Error(w, "Error converting questionnaire: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result, err := ml.MLProf(q_pred)
+
+	if err != nil {
+		http.Error(w, "Error in ML prediction: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("ML prediction result for user %d: %+v\n", userID, result)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "questionnaire processed"})
+	json.NewEncoder(w).Encode(result)
 }
