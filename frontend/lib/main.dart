@@ -5,6 +5,7 @@ import 'package:smartify/pages/nav/nav_page.dart';
 import 'package:smartify/pages/api_server/api_token.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   /**/
   //ВРЕМЕННАЯ ОЧИСТКА — удалит все сохранённые токены!
   /*const storage = FlutterSecureStorage();
