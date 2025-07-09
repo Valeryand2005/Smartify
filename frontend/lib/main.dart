@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smartify/pages/welcome/welcome_page.dart';
 import 'package:smartify/pages/nav/nav_page.dart';
 import 'package:smartify/pages/api_server/api_token.dart';
+import 'package:smartify/pages/recommendations/recommendation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

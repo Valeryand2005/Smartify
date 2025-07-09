@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
 import 'package:smartify/pages/api_server/api_server.dart';
 import 'package:smartify/pages/api_server/api_save_prof.dart';
+import 'package:smartify/pages/recommendations/recommendation_screen.dart';
 
 void main() {
   runApp(const SmartifyApp());
@@ -517,6 +518,12 @@ switch (question.type) {
                               : entry.value;
                           print('${q.number ?? "-"} [${q.block ?? ""}] ${q.text}: $answer');
                         }
+                         Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RecommendationScreen(), // не забудь импортировать
+                          ),
+                        );
                       },
                       child: const Text(
                         'Завершить',
