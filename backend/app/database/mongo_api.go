@@ -75,6 +75,14 @@ type ProfessionPredic struct {
 	Description string   `json:"description"`
 }
 
+type Tutor struct {
+	UserID     int       `json:"user_id" bson:"user_id"`
+	Cource     int       `json:"cource" bson:"cource"`
+	University []string  `json:"university" bson:"university"`
+	Interests  []string  `json:"interests" bson:"interests"`
+	TimeStamp  time.Time `bson:"timestamp" json:"timestamp"`
+}
+
 func ConnectMongo(uri string) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -205,7 +213,7 @@ func AddQuestionnaire(questionnaire Questionnaire) error {
 }
 
 func AddProfessionRecommendation(p ProfessionRec) error {
-	collection := mongoClient.Database("smartify").Collection("ProfessionRecommendation")
+	collection := mongoClient.Database("smartify").Collection("profession_recommendation")
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
@@ -235,5 +243,39 @@ func AddProfessionRecommendation(p ProfessionRec) error {
 	}
 
 	log.Println("Profession Recommendation not updated: older timestamp")
+	return nil
+}
+
+func AddTutor(t Tutor) error {
+	collection := mongoClient.Database("smartify").Collection("tutors")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	if t.TimeStamp.IsZero() {
+		t.TimeStamp = time.Now()
+	}
+
+	var existing Tutor
+	err := collection.FindOne(ctx, bson.M{"user_id": t.UserID}).Decode(&existing)
+
+	if err == mongo.ErrNoDocuments {
+		_, err1 := collection.InsertOne(ctx, t)
+		if err1 != nil {
+			return err1
+		}
+		log.Println("Successfully inserted tutor!")
+		return nil
+	} else if err != nil {
+		return err
+	} else if p.TimeStamp.After(existing.TimeStamp) {
+		_, updateErr := collection.ReplaceOne(ctx, bson.M{"user_id": t.UserID}, t)
+		if updateErr != nil {
+			return updateErr
+		}
+		log.Println("Successfully updated tutor!")
+		return nil
+	}
+
+	log.Println("Tutor not updated: older timestamp")
 	return nil
 }
