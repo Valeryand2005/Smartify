@@ -163,7 +163,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
           content: Text("Анкета отправлена! Получено ${predictions.length} рекомендаций."),
         ),
       );
-      print(JsonEncoder.withIndent('  ').convert(predictions));
+      print(predictions);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
